@@ -1,0 +1,96 @@
+# ─────────────────────────────────────────────────────────
+# NyayaSatya .gitignore
+# Covers: Python, Node/React, .env, OS files
+# ─────────────────────────────────────────────────────────
+
+# ── Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+ENV/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+
+# ── Node / React / Vite ───────────────────────────────────
+node_modules/
+dist/
+.next/
+out/
+.nuxt/
+.output/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.cache/
+.parcel-cache/
+.turbo/
+
+# ── Environment / Secrets ─────────────────────────────────
+.env
+.env.*
+!.env.example          # keep the example template
+*.pem
+*.key
+secrets.json
+
+# ── Supabase ──────────────────────────────────────────────
+.supabase/
+supabase/.temp/
+
+# ── Docker ────────────────────────────────────────────────
+*.env.docker
+
+# ── OS / Editor ───────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ── IDEs ──────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.cursor/
+.windsurf/
+
+# ── Alembic ───────────────────────────────────────────────
+# Keep versions tracked, ignore only temp files
+alembic/versions/*.pyc
+
+# ── Logs ──────────────────────────────────────────────────
+*.log
+logs/
+
+# ── TypeScript build output ───────────────────────────────
+*.tsbuildinfo
