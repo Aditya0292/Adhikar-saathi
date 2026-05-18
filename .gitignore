@@ -88,6 +88,10 @@ $RECYCLE.BIN/
 # Keep versions tracked, ignore only temp files
 alembic/versions/*.pyc
 
+# ── Internal / Private docs ───────────────────────────────
+NyayaSatya_YOUR_Prompt_v2.md
+*_YOUR_Prompt*.md
+
 # ── Logs ──────────────────────────────────────────────────
 *.log
 logs/
