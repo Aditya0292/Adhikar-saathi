@@ -17,47 +17,54 @@ NyayaSatya is an Indian legal advisory platform that lets anyone ask legal quest
 
 ---
 
-## Who Owns What
+## System Architecture & Modules
 
-### Your Scope (Backend Lead)
-| Area | Files |
-|------|-------|
-| FastAPI backend, all routes | `backend/app/` |
-| Supabase Auth integration | `backend/app/dependencies.py`, `backend/app/supabase_client.py` |
-| Lawyer registration API + admin verification | `backend/app/api/v1/lawyer_auth.py` |
-| User profile routes | `backend/app/api/v1/user_auth.py` |
-| Rate limiting (Redis) | `backend/app/middleware/rate_limit.py` |
-| Storage (Supabase Storage) | `backend/app/services/storage_service.py` |
-| Database schema + RLS + triggers | `supabase/migrations/` |
-| Frontend auth flows + all UI components | `frontend/src/` |
-| CI/CD pipelines | `.github/workflows/` |
+The repository is structured as a monorepo consisting of the platform layer, AI service integrations, database schema definitions, and interactive agent adapters.
 
-### Friend's Scope (AI/RAG Lead)
-| Area | Files |
-|------|-------|
-| Fast Mode AI service | `backend/app/services/fast_mode.py` |
-| Verified Mode RAG service | `backend/app/services/verified_mode.py` |
-| Document AI processing | `backend/app/services/doc_service.py` |
-| pgvector table + embeddings | `backend/app/models/legal_chunk.py` |
-| Legal corpus ingestion | `corpus/` |
+### Core Application & Platform Layer
+| Module / Area | Component / Path |
+|---|---|
+| **FastAPI Backend** | `backend/app/` — Main API services, endpoints, and utilities |
+| **Authentication Service** | `backend/app/dependencies.py`, `backend/app/supabase_client.py` — Supabase Auth tokens & claims verification |
+| **Lawyer Directory APIs** | `backend/app/api/v1/lawyer_auth.py`, `lawyer_service.py` — Advocate verification & matching algorithms |
+| **Profile Management** | `backend/app/api/v1/user_auth.py` — User preferences and query logs |
+| **Platform Protection** | `backend/app/middleware/rate_limit.py` — Redis-backed sliding window rate limiters |
+| **Secure Storage Client** | `backend/app/services/storage_service.py` — File upload handling with Supabase Storage |
+| **Interactive Client** | `frontend/src/` — React SPA with Zustand state management and Tailwind layout styling |
+| **CI/CD Pipelines** | `.github/workflows/` — Automated test validation and deployment workflows |
 
-**Interface contract** — your friend implements these method signatures (do not change signatures without agreement):
+### AI, RAG & Agentic Layer
+| Module / Area | Component / Path |
+|---|---|
+| **Fast Mode Service** | `backend/app/services/fast_mode.py` — Real-time direct LLM parsing and multi-language streaming responses |
+| **Verified Mode Service** | `backend/app/services/verified_mode.py` — Citations-based Retrieval-Augmented Generation pipeline |
+| **Document Processing** | `backend/app/services/doc_service.py` — Legal document parser and risk analyzer (OCR + structural evaluation) |
+| **Knowledge Base Embeddings** | `backend/app/models/legal_chunk.py`, `vector_store.py` — Vector indices and search routines |
+| **Corpus Pipeline** | `corpus/` — Data cleaning, tokenization, and embedding scripts for primary legislative texts |
+| **Voice Channel Adapter** | `agents/vapi_voice/` — Vapi.ai webhook handler for phone advisory |
+| **Chat Channel Adapter** | `agents/whatsapp_bot/` — Messaging gateway parser for mobile query support |
+
+---
+
+## Integration Contracts
+
+Platform routes leverage abstract service providers to decoupling route controllers from heavy inference jobs. These service contracts must be adhered to for backend extensibility:
 
 ```python
-# fast_mode.py
+# app/services/fast_mode.py
 class FastModeService:
     async def answer(self, query: str, language: str, session_id: str) -> FastModeResponse: ...
-    async def stream(self, query: str, language: str, session_id: str): ...  # yields str tokens
+    async def stream(self, query: str, language: str, session_id: str): ...  # yields streaming text tokens
 
-# verified_mode.py
+# app/services/verified_mode.py
 class VerifiedModeService:
     async def answer(self, query: str, language: str, session_id: str) -> VerifiedModeResponse: ...
     async def stream(self, query: str, language: str, session_id: str): ...
 
-# doc_service.py
+# app/services/doc_service.py
 class DocService:
     async def process(self, document_id: str, storage_path: str) -> None: ...
-    # Must update: processing_status, summary, risk_score, risk_flags, key_clauses
+    # Updates processing status, summary, risk metrics, flagged elements, and critical clauses
 ```
 
 ---
@@ -81,11 +88,12 @@ class DocService:
 
 ```
 nyayasatya/
-├── backend/          ← FastAPI backend (your scope)
-├── frontend/         ← React frontend (your scope)
-├── supabase/         ← DB migrations, RLS, triggers (your scope)
-├── corpus/           ← Legal document corpus (friend's scope)
-├── .github/          ← CI/CD workflows
+├── backend/          ← FastAPI application, routers, services, and tests
+├── frontend/         ← React Single Page Application (UI elements & state)
+├── supabase/         ← Migration scripts, RLS rules, and auth triggers
+├── corpus/           ← Legal knowledge base documents, extraction and embedding tools
+├── agents/           ← Specialized conversational channel handlers (Voice & WhatsApp)
+├── .github/          ← CI/CD pipeline pipelines
 ├── docker-compose.yml
 └── README.md
 ```
@@ -256,19 +264,19 @@ VITE_GOOGLE_MAPS_KEY=
 
 ---
 
-## Build Order (Day-by-Day)
+## Development Roadmap
 
-| Day | Task |
-|-----|------|
-| Day 1 AM | `git init`, create GitHub repo, share with friend |
-| Day 1 PM | Supabase project setup — Auth, storage buckets, run migrations |
-| Day 2 | Backend: Supabase client + JWT auth + lawyer registration API |
-| Day 3 | Backend: User routes + document upload |
-| Day 4 | Frontend: Auth flows (UserSignUp, LawyerRegister wizard) |
-| Day 5 | Frontend: All UI components — LawyerCard, QueryBox, AnswerPanel |
-| Day 6 | Wire frontend ↔ backend, end-to-end test full flows |
-| Day 7 | Deploy to Railway + Vercel, share staging URL with friend |
+| Stage / Phase | Task Description |
+|---|---|
+| **Phase 1: Setup** | Repository initialization, local infrastructure configurations, and schema provisioning |
+| **Phase 2: Auth & DB** | Supabase project establishment: Auth providers setup, private/public storage buckets provisioning, and SQL schema migrations |
+| **Phase 3: Core API** | Backend client integration: JWT token verification dependencies, internal rate-limiting middleware, and Lawyer Registration APIs |
+| **Phase 4: Integrations** | User profiles routing, document parsing hooks, and abstract legal query service structures |
+| **Phase 5: Client App** | React SPA implementation: Authentication interfaces, multiphase registration wizards, and responsive views |
+| **Phase 6: UI Blocks** | Dynamic responsive elements creation: Query inputs, live citation viewers, maps matching layouts, and admin review boards |
+| **Phase 7: End-to-End** | Cross-linking front and back channels, validation workflows testing, RAG stubs wiring, and environment deployments (Vercel & Railway) |
 
 ---
 
 *NyayaSatya — Legal answers for every Indian 🇮🇳*
+
