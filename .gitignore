@@ -98,3 +98,4 @@ logs/
 
 # ── TypeScript build output ───────────────────────────────
 *.tsbuildinfo
+.env
