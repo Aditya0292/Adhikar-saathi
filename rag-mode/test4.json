@@ -1,0 +1,15 @@
+{
+  "query": "My landlord is not returning security deposit",
+  "response": "Direct Answer: You can file a civil suit for recovery or approach the Rent Controller under the applicable State Rent Control Act [Source 1].\n\nRelevant Law: Transfer of Property Act 1882 [Source 1].\n\nPlain Explanation: As a tenant, you are entitled to get your security deposit back within a reasonable time after vacating the premises. If your landlord wrongfully withholds the deposit, you have legal recourse [Source 1].\n\nNext Step: Gather all relevant documents, including your rental agreement and proof of vacating the premises, and consider consulting a lawyer to file a civil suit or approach the Rent Controller [Source 1].\n\nSources Used: \n- [Source 1 | Transfer_of_Property_Act_1882]\n\nVerified from NyayaSatya legal database.",
+  "verified": true,
+  "faithfulness_score": 95,
+  "sources_used": 1,
+  "sources": [
+    {
+      "source_num": 1,
+      "score": 0.99877924,
+      "preview": "Transfer of Property Act 1882: A landlord must return the security deposit within a reasonable time after the tenant vacates. Wrongful withholding of security deposit entitles the tenant to file a civ"
+    }
+  ],
+  "query_type": "civil"
+}

@@ -1,0 +1,15 @@
+{
+  "query": "Boss fired me without notice what can I do",
+  "response": "Direct Answer: You can approach the Labour Commissioner for wrongful termination.\nRelevant Law: Industrial Disputes Act 1947 [Source 1].\nPlain Explanation: As per the Act, an employer cannot terminate an employee without giving 1 month notice or pay in lieu of notice for employees with over 1 year of service [Source 1].\nNext Step: File a complaint with the Labour Commissioner, citing the wrongful termination and seeking relief under the Industrial Disputes Act 1947 [Source 1].\nSources Used: [Source 1]\nVerified from NyayaSatya legal database.",
+  "verified": true,
+  "faithfulness_score": 90,
+  "sources_used": 1,
+  "sources": [
+    {
+      "source_num": 1,
+      "score": 0.848847,
+      "preview": "Industrial Disputes Act 1947: An employer cannot terminate an employee without giving 1 month notice or pay in lieu of notice for employees with over 1 year of service. Wrongful termination entitles t"
+    }
+  ],
+  "query_type": "labour"
+}

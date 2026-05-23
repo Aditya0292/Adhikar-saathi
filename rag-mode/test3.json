@@ -1,0 +1,9 @@
+{
+  "query": "What is the capital of France?",
+  "response": "I can only answer questions related to Indian law. \n               Please ask about your legal rights, applicable laws, \n               or legal procedures in India.",
+  "verified": false,
+  "faithfulness_score": 100,
+  "sources_used": 0,
+  "sources": [],
+  "query_type": "other"
+}
