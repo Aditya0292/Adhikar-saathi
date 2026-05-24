@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=Noto+Sans:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark (hero, marketing sections) */
+  --bg-dark:          #0A0E0B;
+  --bg-dark-2:        #111A13;
+  --text-primary:     #F0EDE6;
+  --text-secondary:   #8A9E8D;
+  --border-dark:      rgba(255, 255, 255, 0.08);
+
+  /* Light (product UI sections, dashboard mockups) */
+  --bg-light:         #F7F5F0;
+  --bg-light-2:       #FFFFFF;
+  --text-dark:        #1A1F1B;
+  --text-muted:       #6B7A6E;
+  --border-light:     rgba(0, 0, 0, 0.08);
+
+  /* Brand — used sparingly */
+  --green-primary:    #1B4332;
+  --green-mid:        #2D6A4F;
+  --green-bright:     #52B788;
+  --gold:             #C9A84C;
+  --gold-muted:       #8B6914;
+}
+
+@layer base {
+  body {
+    @apply bg-nyaya-dark font-sans text-nyaya-text antialiased;
+  }
+}
+
+/* Custom scrollbars for rich sleek look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full hover:bg-slate-400;
+}
+
+/* Smooth micro-animations for Premium UX */
+.transition-all-custom {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hide-scrollbars::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbars {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
