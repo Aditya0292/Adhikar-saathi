@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NyayaSatya — Fast Mode</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        nyaya: {
+          navy:          '#0D2137',
+          teal:          '#0E7C6E',
+          bg:            '#F4F6F8',
+          warning:       '#888888',
+          emergencyBg:   '#FEECEC',
+          emergencyText: '#C0392B'
+        }
+      },
+      fontFamily: {
+        sans: ['system-ui','-apple-system','BlinkMacSystemFont','"Segoe UI"','Roboto','"Helvetica Neue"','Arial','sans-serif']
+      }
+    }
+  }
+}
+</script>
+<style>
+  .chat-scroll::-webkit-scrollbar { width: 6px; }
+  .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+  .chat-scroll::-webkit-scrollbar-thumb { background-color: #CBD5E1; border-radius: 20px; }
+
+  .typing-dot { animation: typingAnim 1.4s infinite ease-in-out both; }
+  .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+  .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+  @keyframes typingAnim {
+    0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
+    40%           { transform: scale(1); opacity: 1;   }
+  }
+
+  .ai-message { white-space: pre-wrap; word-break: break-word; }
+  textarea:disabled { background: #f9fafb; cursor: not-allowed; }
+  button:disabled   { opacity: 0.6; cursor: not-allowed; }
+
+  @keyframes sosPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.5); }
+    50%       { box-shadow: 0 0 0 10px rgba(192,57,43,0); }
+  }
+  .sos-pulse { animation: sosPulse 2s infinite; }
+
+  @keyframes wave {
+    0%, 100% { transform: scaleY(1);   opacity: 0.6; }
+    50%       { transform: scaleY(1.8); opacity: 1;   }
+  }
+  .wave-bar { animation: wave 1s ease-in-out infinite; }
+  .wave-bar:nth-child(2) { animation-delay: 0.15s; }
+  .wave-bar:nth-child(3) { animation-delay: 0.3s;  }
+  .wave-bar:nth-child(4) { animation-delay: 0.45s; }
+  .wave-bar:nth-child(5) { animation-delay: 0.6s;  }
+
+  /* ── Place cards ── */
+  .place-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 6px;
+    gap: 10px;
+    background: #f8fafc;
+    transition: background 0.15s;
+  }
+  .place-card:hover { background: #eef2f7; }
+  .place-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0D2137;
+    word-break: break-word;
+    text-decoration: none;
+    cursor: pointer;
+  }
+  .place-name:hover { text-decoration: underline; color: #0E7C6E; }
+  .place-dist { font-size: 11px; color: #888; margin-top: 2px; }
+  .dir-btn {
+    background: #0E7C6E;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  .dir-btn:hover { background: #0a5c52; }
+  .search-maps-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #4285F4;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    margin-top: 8px;
+    width: 100%;
+    justify-content: center;
+  }
+  .search-maps-btn:hover { background: #2a6dd9; }
+</style>
+</head>
+
+<body class="bg-nyaya-bg h-screen flex flex-col font-sans overflow-hidden">
+
+  <!-- ── NAVBAR ── -->
+  <header class="bg-white shadow-sm px-4 py-3 flex items-center justify-between z-10 shrink-0">
+    <div class="flex items-center gap-3">
+      <h1 class="text-xl font-bold text-nyaya-navy flex items-center gap-2">
+        <span class="text-2xl">⚖</span> NyayaSatya
+      </h1>
+      <span class="bg-nyaya-teal text-white text-[10px] sm:text-xs font-semibold px-2 py-1 rounded-md tracking-wide">
+        Fast Mode
+      </span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="text-nyaya-warning text-[10px] sm:text-sm text-right leading-tight hidden sm:block">
+        General legal information only
+      </div>
+      <button id="sos-nav-btn" onclick="startSOS()"
+        class="sos-pulse bg-red-600 hover:bg-red-700 text-white font-bold
+               text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all shrink-0">
+        🆘 <span>SOS</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── CHAT AREA ── -->
+  <main id="chat-container" class="flex-1 overflow-y-auto p-4 chat-scroll flex flex-col gap-4"></main>
+
+  <!-- ── TYPING INDICATOR ── -->
+  <div id="typing-indicator" class="hidden px-4 pb-2 shrink-0">
+    <div class="flex flex-col items-start self-start max-w-[85%] sm:max-w-[70%]">
+      <div class="bg-white border-l-4 border-nyaya-teal rounded-r-xl rounded-bl-xl p-3 shadow-sm flex gap-1 items-center h-[44px] w-16">
+        <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+        <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+        <div class="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── INPUT AREA ── -->
+  <footer class="bg-white p-3 sm:p-4 border-t border-gray-200 shrink-0">
+    <div class="max-w-3xl mx-auto flex flex-col gap-2">
+      <form id="chat-form" class="flex gap-2 items-end">
+        <textarea id="message-input" rows="1" autocomplete="off"
+          placeholder="Ask your legal question in English or Hindi..."
+          class="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none
+                 focus:ring-2 focus:ring-nyaya-teal focus:border-transparent
+                 resize-none overflow-hidden text-[15px] leading-normal transition-all"></textarea>
+        <button type="submit" id="send-button"
+          class="bg-nyaya-navy hover:opacity-90 text-white rounded-lg px-5 py-3
+                 font-semibold transition-all flex items-center justify-center min-w-[80px] shrink-0">
+          Send
+        </button>
+      </form>
+      <p class="text-center text-xs text-nyaya-warning">
+        NyayaSatya provides legal awareness only. Not a substitute for a lawyer.
+      </p>
+    </div>
+  </footer>
+
+  <!-- ── SOS CONFIRM MODAL ── -->
+  <div id="sos-confirm-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
+    style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl">
+      <div class="text-4xl mb-3">⚠️</div>
+      <h2 class="text-lg font-bold text-nyaya-navy mb-2">Start Emergency Call?</h2>
+      <p class="text-gray-500 text-sm mb-6 leading-relaxed">
+        This will connect you to NyayaSatya emergency legal guidance.
+        Use only for genuine legal emergencies.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="cancelSOS()"
+          class="flex-1 border border-gray-300 text-gray-600 font-semibold py-3 rounded-xl text-sm hover:bg-gray-50 transition-all">
+          Cancel
+        </button>
+        <button onclick="confirmSOS()"
+          class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl text-sm transition-all">
+          Yes, Connect
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SOS ACTIVE MODAL ── -->
+  <div id="sos-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
+    style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <span class="text-3xl">🆘</span>
+      </div>
+      <h2 class="text-xl font-bold text-red-600 mb-1">Emergency Legal Call</h2>
+      <p class="text-gray-500 text-sm mb-5 leading-relaxed">
+        Speak your situation clearly. NyayaSatya will guide you through your legal rights.
+      </p>
+      <div class="mb-5">
+        <p id="sos-status" class="text-sm text-gray-500 italic mb-3">Connecting...</p>
+        <div id="call-wave" class="hidden justify-center items-end gap-1 h-8">
+          <div class="wave-bar w-1.5 h-4 bg-red-400 rounded-full"></div>
+          <div class="wave-bar w-1.5 h-6 bg-red-500 rounded-full"></div>
+          <div class="wave-bar w-1.5 h-8 bg-red-600 rounded-full"></div>
+          <div class="wave-bar w-1.5 h-6 bg-red-500 rounded-full"></div>
+          <div class="wave-bar w-1.5 h-4 bg-red-400 rounded-full"></div>
+        </div>
+      </div>
+      <div class="bg-gray-50 rounded-xl p-3 mb-5 text-left">
+        <p class="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Emergency Numbers</p>
+        <div class="grid grid-cols-2 gap-1.5 text-xs text-gray-600">
+          <div>🚨 Police: <strong>100</strong></div>
+          <div>🚑 Ambulance: <strong>108</strong></div>
+          <div>👩 Women: <strong>181</strong></div>
+          <div>📞 All emergencies: <strong>112</strong></div>
+        </div>
+      </div>
+      <button onclick="endSOS()"
+        class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl transition-all text-sm">
+        End Call
+      </button>
+    </div>
+  </div>
+
+  <!-- ── GPS PERMISSION MODAL ── -->
+  <div id="gps-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-4"
+    style="background:rgba(0,0,0,0.6);backdrop-filter:blur(4px)">
+    <div class="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl">
+      <div class="text-4xl mb-3">📍</div>
+      <h2 class="text-lg font-bold text-nyaya-navy mb-2">Find Nearest Help?</h2>
+      <p class="text-gray-500 text-sm mb-6 leading-relaxed">
+        NyayaSatya can show you the nearest
+        <strong id="gps-place-type">offices</strong> based on your query.
+        Your location is never stored.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="denyGPS()"
+          class="flex-1 border border-gray-300 text-gray-600 font-semibold py-3 rounded-xl text-sm hover:bg-gray-50 transition-all">
+          No Thanks
+        </button>
+        <button onclick="allowGPS()"
+          class="flex-1 bg-nyaya-teal hover:opacity-90 text-white font-bold py-3 rounded-xl text-sm transition-all">
+          📍 Share Location
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OFFICIAL VAPI SDK ── -->
+  <script>
+    var vapiInstance = null;
+    const VAPI_PUBLIC_KEY   = "7e0c631f-3a31-4a8b-a368-191d26c1703f";
+    const VAPI_ASSISTANT_ID = "65323831-390a-45b5-8eba-633bf0787cc3";
+
+    (function(d, t) {
+      var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
+      g.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
+      g.defer = true; g.async = true;
+      s.parentNode.insertBefore(g, s);
+      g.onload = function() {
+        vapiInstance = window.vapiSDK.run({
+          apiKey:    VAPI_PUBLIC_KEY,
+          assistant: VAPI_ASSISTANT_ID,
+          config: {
+            position: "bottom-right", offset: "40px", width: "50px", height: "50px",
+            idle: {
+              color: "rgb(192,57,43)", type: "pill",
+              title: "🆘 SOS", subtitle: "Emergency Legal Help",
+              icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone.svg"
+            },
+            loading: {
+              color: "rgb(180,100,0)", type: "pill",
+              title: "Connecting...", subtitle: "Please wait",
+              icon: "https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg"
+            },
+            active: {
+              color: "rgb(14,124,110)", type: "pill",
+              title: "Call in progress", subtitle: "Tap to end",
+              icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg"
+            }
+          }
+        });
+        if (vapiInstance) {
+          vapiInstance.on('call-start', () => {
+            const s = document.getElementById('sos-status');
+            const w = document.getElementById('call-wave');
+            if (s) s.textContent = 'Connected — speak your situation';
+            if (w) { w.style.display = 'flex'; w.classList.remove('hidden'); }
+          });
+          vapiInstance.on('speech-start', () => {
+            const s = document.getElementById('sos-status');
+            if (s) s.textContent = '🎙️ Listening...';
+          });
+          vapiInstance.on('speech-end', () => {
+            const s = document.getElementById('sos-status');
+            if (s) s.textContent = '⏳ Getting legal guidance...';
+          });
+          vapiInstance.on('call-end', () => {
+            document.getElementById('sos-modal').classList.add('hidden');
+            document.getElementById('call-wave').classList.add('hidden');
+            document.getElementById('sos-status').textContent = 'Connecting...';
+            appendAssistantMessage(
+              'Your emergency legal guidance call has ended.\n\n' +
+              'If you need further help, continue asking questions here or call 112 for immediate assistance.'
+            );
+          });
+          vapiInstance.on('error', (err) => {
+            console.error('Vapi error:', err);
+            const s = document.getElementById('sos-status');
+            if (s) s.textContent = '❌ Connection failed. Try again.';
+          });
+        }
+      };
+      g.onerror = () => console.error('Vapi SDK failed to load');
+    })(document, "script");
+  </script>
+
+  <script>
+    // Auto-detects localhost or ngrok — no hardcoding needed
+    const BACKEND_URL = window.location.origin;
+
+    const chatContainer   = document.getElementById('chat-container');
+    const chatForm        = document.getElementById('chat-form');
+    const messageInput    = document.getElementById('message-input');
+    const typingIndicator = document.getElementById('typing-indicator');
+    const sendButton      = document.getElementById('send-button');
+    const sosModal        = document.getElementById('sos-modal');
+    const sosConfirmModal = document.getElementById('sos-confirm-modal');
+    const sosStatus       = document.getElementById('sos-status');
+    const callWave        = document.getElementById('call-wave');
+    const gpsModal        = document.getElementById('gps-modal');
+
+    let conversationHistory = [];
+    let pendingIntent = null;
+
+    // ── Helpers ──────────────────────────────────────────
+
+    function escapeHtml(str) {
+      return str.replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function scrollToBottom() { chatContainer.scrollTop = chatContainer.scrollHeight; }
+    function setInputEnabled(enabled) {
+      messageInput.disabled = !enabled;
+      sendButton.disabled   = !enabled;
+      if (enabled) messageInput.focus();
+    }
+    function resizeTextarea() {
+      messageInput.style.height = 'auto';
+      messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+    }
+    messageInput.addEventListener('input', resizeTextarea);
+    messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        chatForm.dispatchEvent(new Event('submit'));
+      }
+    });
+
+    // ── Chat bubbles ──────────────────────────────────────
+
+    function appendUserMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'flex justify-end';
+      div.innerHTML = `
+        <div class="max-w-[85%] sm:max-w-[70%] bg-nyaya-navy text-white
+                    rounded-l-xl rounded-br-xl px-4 py-3 shadow-sm
+                    text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+          ${escapeHtml(text)}
+        </div>`;
+      chatContainer.appendChild(div);
+      scrollToBottom();
+    }
+
+    function appendAssistantMessage(text) {
+      const div = document.createElement('div');
+      div.className = 'flex flex-col items-start max-w-[85%] sm:max-w-[70%] w-full';
+      const isEmergency = text.includes('This sounds urgent.');
+      let body = escapeHtml(text);
+      let emergencyHtml = '';
+      if (isEmergency) {
+        body = body.replace('This sounds urgent.', '').trim();
+        emergencyHtml = `
+          <div class="flex items-center gap-2 bg-nyaya-emergencyBg text-nyaya-emergencyText
+                      font-semibold text-[14px] px-3 py-2 mb-3 rounded-lg border border-red-200">
+            🆘 This sounds urgent.
+          </div>`;
+      }
+      const dIdx = body.indexOf('⚠️');
+      let mainHtml = body, disclaimerHtml = '';
+      if (dIdx !== -1) {
+        disclaimerHtml = `
+          <div class="mt-3 pt-3 border-t border-gray-100 text-[12px] text-nyaya-warning italic leading-snug">
+            ${body.slice(dIdx)}
+          </div>`;
+        mainHtml = body.slice(0, dIdx).trim();
+      }
+      mainHtml = mainHtml.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+      div.innerHTML = `
+        <div class="bg-white text-nyaya-navy border-l-4 border-nyaya-teal
+                    rounded-r-xl rounded-bl-xl px-4 py-3 shadow-sm
+                    text-[15px] leading-relaxed w-full">
+          ${emergencyHtml}
+          <div class="ai-message">${mainHtml}</div>
+          ${disclaimerHtml}
+        </div>`;
+      chatContainer.appendChild(div);
+      scrollToBottom();
+    }
+
+    // ── Nearby places card ────────────────────────────────
+
+    function appendNearbyCard(data) {
+      const div = document.createElement('div');
+      div.className = 'flex flex-col items-start max-w-[85%] sm:max-w-[70%] w-full';
+
+      let placesHtml = '';
+
+      if (data.places && data.places.length > 0) {
+        // Show each place: name is clickable (opens Maps search), directions button opens nav
+        placesHtml = data.places.map(p => `
+          <div class="place-card">
+            <div style="min-width:0; flex:1">
+              <a href="${p.maps_url}" target="_blank" rel="noopener" class="place-name">
+                📍 ${escapeHtml(p.name)}
+              </a>
+              <div class="place-dist">${p.distance_km} km away</div>
+            </div>
+            <a href="${p.directions_url}" target="_blank" rel="noopener" class="dir-btn">
+              🗺 Directions
+            </a>
+          </div>`).join('');
+
+        // Also show a "View all on Maps" button
+        placesHtml += `
+          <a href="${data.gmaps_search_url}" target="_blank" rel="noopener" class="search-maps-btn">
+            🔍 View all ${data.label}s on Google Maps
+          </a>`;
+      } else {
+        // Overpass found nothing — go straight to Maps search at user's location
+        placesHtml = `
+          <p class="text-[12px] text-gray-500 mb-2">
+            No results found in OpenStreetMap data. Opening Google Maps search instead:
+          </p>
+          <a href="${data.gmaps_search_url}" target="_blank" rel="noopener" class="search-maps-btn">
+            🔍 Find Nearest ${data.label} on Google Maps
+          </a>`;
+      }
+
+      div.innerHTML = `
+        <div class="bg-white text-nyaya-navy border-l-4 border-yellow-400
+                    rounded-r-xl rounded-bl-xl px-4 py-3 shadow-sm w-full">
+          <div class="font-semibold text-[12px] text-gray-500 mb-2 uppercase tracking-wide">
+            ${data.emoji} Nearest ${data.label}
+          </div>
+          ${placesHtml}
+        </div>`;
+
+      chatContainer.appendChild(div);
+      scrollToBottom();
+    }
+
+    // ── GPS logic ─────────────────────────────────────────
+
+    const intentLabels = {
+      police:  'Police Stations',
+      legal:   'Legal Offices / Courts',
+      traffic: 'RTO Offices'
+    };
+
+    function triggerNearby(intent) {
+      if (!intent || intent === 'none') return;
+      pendingIntent = intent;
+      document.getElementById('gps-place-type').textContent = intentLabels[intent] || 'offices';
+      gpsModal.classList.remove('hidden');
+    }
+
+    function allowGPS() {
+      gpsModal.classList.add('hidden');
+      if (!navigator.geolocation) {
+        appendAssistantMessage('Location not supported by your browser.');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          await fetchNearby(pos.coords.latitude, pos.coords.longitude, pendingIntent);
+          pendingIntent = null;
+        },
+        () => {
+          appendAssistantMessage('Could not get your location. Please enable location permissions and try again.');
+          pendingIntent = null;
+        },
+        { timeout: 10000 }
+      );
+    }
+
+    function denyGPS() {
+      gpsModal.classList.add('hidden');
+      pendingIntent = null;
+    }
+
+    async function fetchNearby(lat, lng, intent) {
+      try {
+        const res = await fetch(`${BACKEND_URL}/nearby`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ lat, lng, intent })
+        });
+        if (!res.ok) throw new Error('Nearby fetch failed');
+        appendNearbyCard(await res.json());
+      } catch (err) {
+        console.error('Nearby error:', err);
+      }
+    }
+
+    // ── Form submit ───────────────────────────────────────
+
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      messageInput.value = '';
+      resizeTextarea();
+      appendUserMessage(message);
+      typingIndicator.classList.remove('hidden');
+      scrollToBottom();
+      setInputEnabled(false);
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/chat`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ message, history: conversationHistory })
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        typingIndicator.classList.add('hidden');
+
+        const reply  = data.response || "I'm having trouble connecting. Please try again.";
+        const intent = data.intent   || 'none';
+
+        appendAssistantMessage(reply);
+        conversationHistory.push({ role: 'user',      content: message });
+        conversationHistory.push({ role: 'assistant', content: reply   });
+        if (conversationHistory.length > 12) conversationHistory = conversationHistory.slice(-12);
+
+        if (intent !== 'none') setTimeout(() => triggerNearby(intent), 600);
+
+      } catch (err) {
+        console.error('Chat error:', err);
+        typingIndicator.classList.add('hidden');
+        const errMsg = "I'm having trouble connecting. Please try again.";
+        appendAssistantMessage(errMsg);
+        conversationHistory.push({ role: 'user',      content: message });
+        conversationHistory.push({ role: 'assistant', content: errMsg  });
+      } finally {
+        setInputEnabled(true);
+      }
+    });
+
+    // ── Welcome ───────────────────────────────────────────
+
+    (function() {
+      const welcome =
+        `Namaste 🙏 I am NyayaSatya, your Indian legal awareness assistant.\n\n` +
+        `Ask me anything about your legal rights, applicable laws, or legal procedures in India — in English or Hindi.\n\n` +
+        `⚠️ This is general legal information for awareness purposes only, not legal advice. For your specific situation, consult a qualified lawyer.`;
+      appendAssistantMessage(welcome);
+      conversationHistory.push({ role: 'assistant', content: welcome });
+    })();
+
+    // ── SOS ───────────────────────────────────────────────
+
+    function startSOS()  { sosConfirmModal.classList.remove('hidden'); }
+    function cancelSOS() { sosConfirmModal.classList.add('hidden'); }
+
+    function confirmSOS() {
+      sosConfirmModal.classList.add('hidden');
+      if (!window.vapiSDK) {
+        appendAssistantMessage(
+          'Emergency voice feature is still loading. Please wait a moment and try again, or call 112 directly.'
+        );
+        return;
+      }
+      sosModal.classList.remove('hidden');
+      sosStatus.textContent = 'Connected — speak your situation';
+    }
+
+    function endSOS() {
+      try { if (vapiInstance && typeof vapiInstance.stop === 'function') vapiInstance.stop(); } catch(e) {}
+      sosModal.classList.add('hidden');
+      callWave.classList.add('hidden');
+      sosStatus.textContent = 'Connecting...';
+    }
+
+    sosModal.addEventListener('click', (e) => { if (e.target === sosModal) endSOS(); });
+  </script>
+</body>
+</html>

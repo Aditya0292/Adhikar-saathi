@@ -1,0 +1,25 @@
+{
+  "query": "Amazon delivered damaged phone refusing refund",
+  "response": "Direct Answer: You can file a complaint with the Consumer Disputes Redressal Commission [Source 1] [Source 2] as the Consumer Protection Act, 2019 provides protection of consumer rights and resolution of consumer complaints.\n\nRelevant Law: The Consumer Protection Act, 2019 establishes the Consumer Disputes Redressal Commission at the district, state, and national levels [Source 1] [Source 2].\n\nPlain Explanation: As a consumer, you have the right to file a complaint against Amazon for delivering a damaged phone and refusing a refund, as the Act introduces provisions for product liability [Source 1] [Source 2] [Source 3].\n\nNext Step: You can approach the Central Consumer Protection Authority or file a complaint with the Consumer Disputes Redressal Commission [Source 3] to resolve your complaint.\n\nSources Used: [Source 1], [Source 2], [Source 3]\n\nVerified from NyayaSatya legal database.",
+  "verified": false,
+  "faithfulness_score": 90,
+  "sources_used": 3,
+  "sources": [
+    {
+      "source_num": 1,
+      "score": 0.002570868,
+      "preview": "Instruction: Can you summarize the main provisions of the Consumer Protection Act, 2019?\nResponse: The Consumer Protection Act, 2019 provides protection of consumer rights and resolution of consumer c"
+    },
+    {
+      "source_num": 2,
+      "score": 0.0023688741,
+      "preview": "Question: Can you summarize the main provisions of the Consumer Protection Act, 2019?\nAnswer: The Consumer Protection Act, 2019 provides protection of consumer rights and resolution of consumer compla"
+    },
+    {
+      "source_num": 3,
+      "score": 0.0020111583,
+      "preview": "Instruction: Can you summarize the implications of the Consumer Protection Act, 2019?\nResponse: The Consumer Protection Act, 2019 enhances consumer rights and provides a mechanism for complaint redres"
+    }
+  ],
+  "query_type": "consumer"
+}

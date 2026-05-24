@@ -1,0 +1,25 @@
+{
+  "query": "What are my rights if police arrest me?",
+  "response": "Direct Answer: If you are arrested, you have the right to know the reasons for your arrest and to consult with a lawyer before being questioned [Source 2]. You are also entitled to be informed of the grounds for your arrest as soon as possible and to have the opportunity to consult with and be defended by a legal practitioner of your choice [Source 3].\n\nRelevant Law: Section 80 of the Criminal Procedure Code [Source 1], and clauses related to arrest and detention [Source 2].\n\nPlain Explanation: When arrested, you should be told why you are being arrested and have the chance to talk to a lawyer. The police must follow the law when arresting you, and you have the right to be treated fairly and humanely while in custody [Source 2].\n\nNext Step: If you are arrested, ask the police to inform you of the reasons for your arrest and request to consult with a lawyer [Source 2]. You should also be aware of your right to be brought before a court within 24 hours of your arrest [Source 2].\n\nSources Used: [Source 1], [Source 2], [Source 3]\n\nVerified from NyayaSatya legal database.",
+  "verified": true,
+  "faithfulness_score": 90,
+  "sources_used": 3,
+  "sources": [
+    {
+      "source_num": 1,
+      "score": 0.98166555,
+      "preview": "A person, about to be arrested, is entitled to know under what power the constable is arresting him and, if a police-officer, without notifying the substance of the warrant to the person against whom "
+    },
+    {
+      "source_num": 2,
+      "score": 0.9785903,
+      "preview": "1. A person who has been arrested must be informed of the reasons for their arrest and given the opportunity to consult with a lawyer before being questioned.\n2. If a person is detained in custody pen"
+    },
+    {
+      "source_num": 3,
+      "score": 0.9776285,
+      "preview": "Instruction: What are the rights of a person who is arrested, according to clause (1)?\nResponse: According to clause (1), a person who is arrested has the right to be informed of the grounds for such "
+    }
+  ],
+  "query_type": "criminal"
+}
