@@ -260,74 +260,7 @@ tailwind.config = {
     </div>
   </div>
 
-  <!-- ── OFFICIAL VAPI SDK ── -->
-  <script>
-    var vapiInstance = null;
-    const VAPI_PUBLIC_KEY   = "7e0c631f-3a31-4a8b-a368-191d26c1703f";
-    const VAPI_ASSISTANT_ID = "65323831-390a-45b5-8eba-633bf0787cc3";
-
-    (function(d, t) {
-      var g = d.createElement(t), s = d.getElementsByTagName(t)[0];
-      g.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-script-tag@latest/dist/assets/index.js";
-      g.defer = true; g.async = true;
-      s.parentNode.insertBefore(g, s);
-      g.onload = function() {
-        vapiInstance = window.vapiSDK.run({
-          apiKey:    VAPI_PUBLIC_KEY,
-          assistant: VAPI_ASSISTANT_ID,
-          config: {
-            position: "bottom-right", offset: "40px", width: "50px", height: "50px",
-            idle: {
-              color: "rgb(192,57,43)", type: "pill",
-              title: "🆘 SOS", subtitle: "Emergency Legal Help",
-              icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone.svg"
-            },
-            loading: {
-              color: "rgb(180,100,0)", type: "pill",
-              title: "Connecting...", subtitle: "Please wait",
-              icon: "https://unpkg.com/lucide-static@0.321.0/icons/loader-2.svg"
-            },
-            active: {
-              color: "rgb(14,124,110)", type: "pill",
-              title: "Call in progress", subtitle: "Tap to end",
-              icon: "https://unpkg.com/lucide-static@0.321.0/icons/phone-off.svg"
-            }
-          }
-        });
-        if (vapiInstance) {
-          vapiInstance.on('call-start', () => {
-            const s = document.getElementById('sos-status');
-            const w = document.getElementById('call-wave');
-            if (s) s.textContent = 'Connected — speak your situation';
-            if (w) { w.style.display = 'flex'; w.classList.remove('hidden'); }
-          });
-          vapiInstance.on('speech-start', () => {
-            const s = document.getElementById('sos-status');
-            if (s) s.textContent = '🎙️ Listening...';
-          });
-          vapiInstance.on('speech-end', () => {
-            const s = document.getElementById('sos-status');
-            if (s) s.textContent = '⏳ Getting legal guidance...';
-          });
-          vapiInstance.on('call-end', () => {
-            document.getElementById('sos-modal').classList.add('hidden');
-            document.getElementById('call-wave').classList.add('hidden');
-            document.getElementById('sos-status').textContent = 'Connecting...';
-            appendAssistantMessage(
-              'Your emergency legal guidance call has ended.\n\n' +
-              'If you need further help, continue asking questions here or call 112 for immediate assistance.'
-            );
-          });
-          vapiInstance.on('error', (err) => {
-            console.error('Vapi error:', err);
-            const s = document.getElementById('sos-status');
-            if (s) s.textContent = '❌ Connection failed. Try again.';
-          });
-        }
-      };
-      g.onerror = () => console.error('Vapi SDK failed to load');
-    })(document, "script");
-  </script>
+  <!-- ── OFFICIAL VAPI SDK (Removed in favor of backend outbound calling) ── -->
 
   <script>
     // Auto-detects localhost or ngrok — no hardcoding needed
@@ -589,23 +522,34 @@ tailwind.config = {
     function startSOS()  { sosConfirmModal.classList.remove('hidden'); }
     function cancelSOS() { sosConfirmModal.classList.add('hidden'); }
 
-    function confirmSOS() {
+    async function confirmSOS() {
       sosConfirmModal.classList.add('hidden');
-      if (!window.vapiSDK) {
-        appendAssistantMessage(
-          'Emergency voice feature is still loading. Please wait a moment and try again, or call 112 directly.'
-        );
-        return;
-      }
       sosModal.classList.remove('hidden');
-      sosStatus.textContent = 'Connected — speak your situation';
+      sosStatus.textContent = 'Calling your registered phone number...';
+      callWave.style.display = 'flex';
+      callWave.classList.remove('hidden');
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/sos-call`, {
+          method: 'POST'
+        });
+        if (!res.ok) throw new Error('SOS call failed');
+        sosStatus.textContent = 'Call initiated. Your phone should ring shortly.';
+      } catch (err) {
+        console.error('SOS call error:', err);
+        sosStatus.textContent = '❌ Failed to initiate call. Please dial 112 manually.';
+        callWave.classList.add('hidden');
+      }
     }
 
     function endSOS() {
-      try { if (vapiInstance && typeof vapiInstance.stop === 'function') vapiInstance.stop(); } catch(e) {}
       sosModal.classList.add('hidden');
       callWave.classList.add('hidden');
       sosStatus.textContent = 'Connecting...';
+      appendAssistantMessage(
+        'SOS call window closed.\n\n' +
+        'If you need further help, continue asking questions here or call 112 for immediate assistance.'
+      );
     }
 
     sosModal.addEventListener('click', (e) => { if (e.target === sosModal) endSOS(); });

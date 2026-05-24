@@ -17,6 +17,11 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 if not GROQ_API_KEY:
     raise RuntimeError("GROQ_API_KEY not set in environment or .env file")
 
+VAPI_PRIVATE_KEY = os.getenv("VAPI_PRIVATE_KEY")
+VAPI_ASSISTANT_ID = os.getenv("VAPI_ASSISTANT_ID")
+VAPI_PHONE_NUMBER_ID = os.getenv("VAPI_PHONE_NUMBER_ID")
+TARGET_PHONE_NUMBER = os.getenv("TARGET_PHONE_NUMBER")
+
 client = Groq(api_key=GROQ_API_KEY)
 
 app = FastAPI(title="NyayaSatya Fast Mode")
@@ -367,6 +372,38 @@ async def vapi_chat_endpoint(req: Request):
     except Exception as e:
         print(f"Groq /vapi-chat error: {e}")
         return {"content": "Please call 112 for immediate help."}
+
+
+# ─── /sos-call ────────────────────────────────────────────
+
+@app.post("/sos-call")
+async def sos_call_endpoint(req: Request):
+    check_rate_limit(req.client.host if req.client else "unknown")
+    
+    if not VAPI_PRIVATE_KEY:
+        raise HTTPException(status_code=500, detail="VAPI configuration missing")
+
+    headers = {
+        "Authorization": f"Bearer {VAPI_PRIVATE_KEY}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "phoneNumberId": VAPI_PHONE_NUMBER_ID,
+        "customer": {
+            "number": TARGET_PHONE_NUMBER
+        },
+        "assistantId": VAPI_ASSISTANT_ID
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=10) as hc:
+            resp = await hc.post("https://api.vapi.ai/call/phone", headers=headers, json=payload)
+            resp.raise_for_status()
+            return {"status": "success", "message": "Call initiated successfully"}
+    except Exception as e:
+        print(f"Vapi /sos-call error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to initiate SOS call")
 
 
 # ─── /health ──────────────────────────────────────────────
