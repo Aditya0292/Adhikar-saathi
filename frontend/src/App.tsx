@@ -16,7 +16,7 @@ import AdminStats from './pages/admin/AdminStats';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import VerifiedAnswer from './pages/VerifiedAnswer';
-import MyDocuments from './pages/MyDocuments';
+import DocumentScanner from './pages/DocumentScanner';
 import QueryHistory from './pages/QueryHistory';
 
 export default function App() {
@@ -41,7 +41,7 @@ export default function App() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/verified" element={<ProtectedRoute><VerifiedAnswer /></ProtectedRoute>} />
-          <Route path="/documents" element={<ProtectedRoute><MyDocuments /></ProtectedRoute>} />
+          <Route path="/documents" element={<ProtectedRoute><DocumentScanner /></ProtectedRoute>} />
           <Route path="/history" element={<ProtectedRoute><QueryHistory /></ProtectedRoute>} />
           
           {/* Private Lawyer Routes (Should ideally have a LawyerProtectedRoute) */}

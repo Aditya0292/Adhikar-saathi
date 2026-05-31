@@ -28,20 +28,20 @@ export function CitationCard({
     : `${actName || 'Citation'}${section ? ` - ${section}` : ''}`;
 
   return (
-    <div className="flex gap-3 mb-3 last:mb-0">
-      <span className="text-nyaya-green-bright font-mono text-xs mt-0.5">[{index}]</span>
+    <div className="flex gap-3 bg-white p-3.5 rounded-2xl border border-black/[0.04] shadow-2xs hover:shadow-xs transition-all duration-200">
+      <span className="text-nyaya-green font-mono text-xs mt-0.5 font-bold">[{index}]</span>
       <div className="flex-1">
         <button 
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center justify-between w-full text-left focus:outline-none group"
+          className="flex items-center justify-between w-full text-left focus:outline-none group cursor-pointer"
         >
-          <span className="text-xs font-semibold text-nyaya-text group-hover:text-nyaya-green-bright transition-colors">
+          <span className="text-xs font-bold text-nyaya-text-dark group-hover:text-nyaya-green transition-colors leading-snug">
             {title}
           </span>
           {expanded ? (
-            <ChevronUp size={14} className="text-nyaya-muted" />
+            <ChevronUp size={14} className="text-nyaya-muted ml-2" />
           ) : (
-            <ChevronDown size={14} className="text-nyaya-muted" />
+            <ChevronDown size={14} className="text-nyaya-muted ml-2" />
           )}
         </button>
         
@@ -54,7 +54,7 @@ export function CitationCard({
               transition={{ duration: 0.2 }}
               className="overflow-hidden"
             >
-              <div className="text-[10px] font-mono text-nyaya-muted mt-2 bg-white/5 p-2.5 rounded border border-white/5 leading-relaxed">
+              <div className="text-xs font-sans text-slate-600 mt-2 bg-nyaya-warm p-2.5 rounded-xl border border-black/[0.04] leading-relaxed">
                 "{excerpt}"
               </div>
             </motion.div>

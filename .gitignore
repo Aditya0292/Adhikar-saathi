@@ -1,4 +1,49 @@
-fast-mode/.env
+# Environment files
 .env
+backend/.env
+frontend/.env.local
+fast-mode/.env
 rag-mode/.env
-rag-mode/venv
+
+# Python Virtual Environments and dependency caches
+.venv/
+venv/
+rag-mode/venv/
+__pycache__/
+backend/app/**/__pycache__/
+fast-mode/__pycache__/
+
+# IDE / Editor configurations
+.vscode/
+backend/.vscode/
+frontend/.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Prompt .md files (ignoring all markdown except top-level README)
+*.md
+!README.md
+
+# Image assets (no raw images in git)
+*.png
+courthouse_pillars-removebg-preview.png
+scales_of_justice-removebg-preview.png
+frontend/public/courthouse_pillars.png
+frontend/public/scales_of_justice.png
+
+# Frontend build artifact files
+frontend/node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+frontend/tsconfig.node.tsbuildinfo
+frontend/vite.config.js.timestamp*
+
+# RAG temporary test output logs
+rag-mode/test*_output.json
+rag-mode/*.py
+!rag-mode/refit_bm25.py
+backend/test_*.py

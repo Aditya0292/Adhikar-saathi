@@ -144,7 +144,7 @@ async def _sarvam_generate_speech(text: str, language_prefix: str) -> bytes:
             json={
                 "inputs": [text],
                 "target_language_code": sarvam_lang,
-                "speaker": "priya",
+                "speaker": speaker,
                 "pace": 1.0,
                 "speech_sample_rate": 22050,
                 "enable_preamble": False,

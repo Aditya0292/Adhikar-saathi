@@ -34,11 +34,17 @@ export default function LawyerSignIn() {
           return;
       }
       
-      const isVerified = data.session.user.app_metadata?.lawyer_verified;
-      if (!isVerified) {
-          navigate('/lawyer/pending');
-      } else {
+      // Check verified status directly from the database instead of cached JWT metadata
+      const { data: lawyerData } = await supabase
+        .from('lawyers')
+        .select('is_verified, verification_status')
+        .eq('auth_id', data.session.user.id)
+        .single();
+        
+      if (lawyerData?.is_verified === true || lawyerData?.verification_status === 'verified' || data.session.user.app_metadata?.lawyer_verified) {
           navigate('/lawyer/dashboard');
+      } else {
+          navigate('/lawyer/pending');
       }
     }
   };

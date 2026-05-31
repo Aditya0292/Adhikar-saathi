@@ -16,7 +16,7 @@ export function AppShell({ children }: AppShellProps) {
   const navItems = [
     { label: 'Home', icon: Home, path: '/dashboard' },
     { label: 'Find a Lawyer', icon: Users, path: '/lawyers' },
-    { label: 'My Documents', icon: FileText, path: '/documents' },
+    { label: 'Document Scanner', icon: FileText, path: '/documents' },
     { label: 'Profile', icon: User, path: '/profile' },
   ];
 
@@ -24,7 +24,7 @@ export function AppShell({ children }: AppShellProps) {
     { label: 'Quick Answer', icon: HelpCircle, path: '/dashboard' },
     { label: 'Verified Answer', icon: Search, path: '/verified' },
     { label: 'Find a Lawyer', icon: Users, path: '/lawyers' },
-    { label: 'My Documents', icon: FileText, path: '/documents' },
+    { label: 'Document Scanner', icon: FileText, path: '/documents' },
     { label: 'Query History', icon: FileText, path: '/history' },
     { label: 'Settings', icon: Settings, path: '/settings' },
   ];
@@ -172,7 +172,7 @@ export function AppShell({ children }: AppShellProps) {
 
         {/* Main Content scrollable */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-[1400px] mx-auto w-full">
             {children}
           </div>
         </main>

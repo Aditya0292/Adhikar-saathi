@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, status, Depends, Request
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Depends, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
@@ -13,8 +13,23 @@ from app.dependencies import get_current_user
 from app.supabase_client import get_service_client
 from app.utils.speech_preprocessor import preprocess_for_speech
 from app.services.adviser_persona import LANGUAGE_PERSONA_MAP
+from app.config import settings
 
 logger = logging.getLogger("voice_api")
+
+LANG_MAP = {
+    "en": "English",
+    "hi": "Hindi",
+    "ta": "Tamil",
+    "te": "Telugu",
+    "bn": "Bengali",
+    "mr": "Marathi",
+    "gu": "Gujarati",
+    "kn": "Kannada",
+    "ml": "Malayalam",
+    "pa": "Punjabi",
+    "or": "Odia"
+}
 
 router = APIRouter(prefix="/voice", tags=["Voice Engine"])
 
@@ -28,7 +43,7 @@ class StartSessionRequest(BaseModel):
 @router.post("/transcribe")
 async def transcribe_audio_endpoint(
     file: UploadFile = File(...),
-    language: Optional[str] = None
+    language: Optional[str] = Form(None)
 ):
     try:
         content = await file.read()
@@ -166,7 +181,9 @@ async def process_session_turn(
         lang_prefix = session.language.lower().split("-")[0]
         lang_config = LANGUAGE_PERSONA_MAP.get(lang_prefix, LANGUAGE_PERSONA_MAP["en"])
         
+        lang_name = LANG_MAP.get(lang_prefix, "English")
         system_prompt = lang_config["prompt"]
+        system_prompt += f"\n\nCRITICAL: You MUST write your entire response only in {lang_name} language."
         if session.scenario_type:
             system_prompt += f"\nContext: This appears to be a {session.scenario_type} situation. Calibrate your tone accordingly."
             
@@ -296,3 +313,45 @@ async def end_session(
     except Exception as e:
         logger.error(f"Failed to end voice session: {e}")
         raise HTTPException(status_code=500, detail="Failed to end voice session")
+
+@router.post("/sos-call")
+async def main_sos_call_endpoint(request: Request):
+    import httpx
+    
+    if not settings.vapi_private_key:
+        logger.warning(
+            f"Vapi configuration missing on the backend. "
+            f"Simulating SOS call to target: {settings.target_phone_number or 'registered phone number'}"
+        )
+        return {
+            "status": "success",
+            "message": "Call initiated successfully (Mock Mode)",
+            "simulated": True
+        }
+
+    headers = {
+        "Authorization": f"Bearer {settings.vapi_private_key}",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {
+        "phoneNumberId": settings.vapi_phone_number_id,
+        "customer": {
+            "number": settings.target_phone_number
+        },
+        "assistantId": settings.vapi_assistant_id
+    }
+    
+    try:
+        async with httpx.AsyncClient(timeout=10) as hc:
+            resp = await hc.post("https://api.vapi.ai/call", headers=headers, json=payload)
+            try:
+                resp_json = resp.json()
+            except Exception:
+                resp_json = resp.text
+            logger.warning(f"vapi_call_response: status_code={resp.status_code}, body={resp_json}")
+            resp.raise_for_status()
+            return {"status": "success", "message": "Call initiated successfully"}
+    except Exception as e:
+        logger.error(f"Vapi /sos-call error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to initiate SOS call: {str(e)}")

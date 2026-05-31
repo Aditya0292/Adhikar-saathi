@@ -160,9 +160,20 @@ export function VoiceAdviser({ isOpen, onClose, lang }: VoiceAdviserProps) {
       setSessionId(data.session_id);
       
       // Play Greeting audio
-      const greetingText = lang === 'hi' 
-        ? "नमस्ते, मैं न्याय हूँ। आज आपकी क्या सहायता कर सकता हूँ?" 
-        : "Hello, I'm Nyaya, your legal adviser. What can I help you with today?";
+      const greetings: Record<string, string> = {
+        en: "Hello, I'm Nyaya, your legal adviser. What can I help you with today?",
+        hi: "नमस्ते, मैं न्याय हूँ। आज आपकी क्या सहायता कर सकता हूँ?",
+        ta: "வணக்கம், நான் நியாயா. இன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?",
+        te: "నమస్కారం, నేను న్యాయా. ఈరోజు మీకు ఎలా సహాయపడగలను?",
+        bn: "নমস্কার, আমি ন্যায়। আজ আপনাকে কীভাবে সাহায্য করতে পারি?",
+        mr: "नमस्कार, मी न्याय आहे. आज मी तुम्हाला कशी मदत करू शकतो?",
+        gu: "નમસ્તે, હું ન્યાય છું. આજે હું તમને કેવી રીતે મદદ કરી શકું?",
+        kn: "ನಮಸ್ಕಾರ, ನಾನು ನ್ಯಾಯ. ಇಂದು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
+        ml: "നമസ്കാരം, ഞാൻ ന്യായയാണ്. ഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കണം?",
+        pa: "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਮੈਂ ਨਿਆਇਆ ਹਾਂ। ਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?"
+      };
+      const langPrefix = lang ? lang.toLowerCase().split('-')[0] : 'en';
+      const greetingText = greetings[langPrefix] || greetings['en'];
       
       const greetingTurn: Turn = { role: 'adviser', text: greetingText };
       setTurns([greetingTurn]);
@@ -242,13 +253,19 @@ export function VoiceAdviser({ isOpen, onClose, lang }: VoiceAdviserProps) {
 
     const utterance = new SpeechSynthesisUtterance(text);
     const langPrefix = lang ? lang.toLowerCase().split('-')[0] : 'en';
-    if (langPrefix === 'hi') {
-      utterance.lang = 'hi-IN';
-    } else if (langPrefix === 'ta') {
-      utterance.lang = 'ta-IN';
-    } else {
-      utterance.lang = 'en-IN';
-    }
+    const langMap: Record<string, string> = {
+      'en': 'en-IN',
+      'hi': 'hi-IN',
+      'ta': 'ta-IN',
+      'te': 'te-IN',
+      'bn': 'bn-IN',
+      'mr': 'mr-IN',
+      'gu': 'gu-IN',
+      'kn': 'kn-IN',
+      'ml': 'ml-IN',
+      'pa': 'pa-IN'
+    };
+    utterance.lang = langMap[langPrefix] || 'en-IN';
 
     const words = text.split(' ');
     let currentWordIndex = 0;

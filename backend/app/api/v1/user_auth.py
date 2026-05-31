@@ -28,7 +28,23 @@ SUPPORTED_LANGUAGES = {
 async def get_my_profile(user: dict = Depends(require_user)):
     client = get_service_client()
     res = client.table("users").select("*").eq("auth_id", user["sub"]).execute()
+    logger.info("get_my_profile_select", data=res.data)
     if not res.data:
+        # Auto-create user profile if it doesn't exist (useful for OAuth/local development without triggers)
+        email = user.get("email", "")
+        new_user = {
+            "auth_id": user["sub"],
+            "email": email,
+            "preferred_language": "en",
+            "is_active": True
+        }
+        try:
+            insert_res = client.table("users").insert(new_user).execute()
+            logger.info("get_my_profile_insert", data=insert_res.data)
+            if insert_res.data:
+                return insert_res.data[0]
+        except Exception as e:
+            logger.error("auto_create_user_failed", error=str(e))
         raise HTTPException(status_code=404, detail="User profile not found")
     return res.data[0]
 

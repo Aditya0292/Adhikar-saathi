@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   BarChart3, User, Inbox, Calendar, Star, Megaphone, Settings, LogOut,
-  ChevronLeft, ChevronRight, Bell, ExternalLink, Menu
+  ChevronLeft, ChevronRight, Bell, ExternalLink, Menu, Loader2
 } from 'lucide-react';
 import { Overview } from '../../components/lawyer/dashboard/Overview';
 import { ClientRequests } from '../../components/lawyer/dashboard/ClientRequests';
@@ -83,10 +83,11 @@ export default function LawyerDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = (searchParams.get('tab') as DashboardTab) || 'overview';
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [profile, setProfile] = useState<LawyerProfile>(MOCK_PROFILE);
-  const [isAvailable, setIsAvailable] = useState(MOCK_PROFILE.is_available);
+  const [profile, setProfile] = useState<LawyerProfile | null>(null);
+  const [isAvailable, setIsAvailable] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { signOut } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const { user, isLoading: authLoading, signOut } = useAuth();
   
   // Realtime notifications
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
@@ -95,22 +96,30 @@ export default function LawyerDashboard() {
     setSearchParams({ tab });
   };
 
-  // Fetch real profile on mount (silent fallback to mock)
+  // Fetch real profile on mount
   useEffect(() => {
+    if (authLoading || !user) return;
     (async () => {
       try {
         const data = await api.get('/api/v1/lawyers/me/profile');
         if (data && data.id) {
           setProfile(data);
           setIsAvailable(data.is_available ?? true);
+        } else {
+          setProfile(MOCK_PROFILE);
+          setIsAvailable(MOCK_PROFILE.is_available);
         }
       } catch {
-        // Use mock profile
+        setProfile(MOCK_PROFILE);
+        setIsAvailable(MOCK_PROFILE.is_available);
+      } finally {
+        setLoading(false);
       }
     })();
-  }, []);
+  }, [user, authLoading]);
 
   const toggleAvailability = async () => {
+    if (!profile) return;
     const newVal = !isAvailable;
     setIsAvailable(newVal);
     try {
@@ -119,6 +128,15 @@ export default function LawyerDashboard() {
       setIsAvailable(!newVal); // revert on failure
     }
   };
+
+  if (loading || !profile) {
+    return (
+      <div className="h-screen w-screen bg-[#F7F5F0] flex flex-col items-center justify-center text-[#6B7A6E]">
+        <Loader2 className="animate-spin text-[#1B4332] mb-4" size={32} />
+        <span className="font-serif font-semibold text-lg text-[#1A1F1B]">Initializing Secure Dashboard...</span>
+      </div>
+    );
+  }
 
   const initials = profile.full_name
     .split(' ')

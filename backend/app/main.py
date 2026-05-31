@@ -2,7 +2,7 @@ import time
 import uuid
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1 import lawyer_auth, lawyer, user_auth, voice, admin
+from app.api.v1 import lawyer_auth, lawyer, user_auth, voice, admin, query, documents
 from app.config import settings
 
 app = FastAPI(
@@ -42,6 +42,8 @@ app.include_router(lawyer.router, prefix="/api/v1", tags=["Lawyer Dashboard"])
 app.include_router(user_auth.router, prefix="/api/v1", tags=["User Portal"])
 app.include_router(admin.router, prefix="/api/v1")
 app.include_router(voice.router, prefix="/api/v1")
+app.include_router(query.router, prefix="/api/v1/query", tags=["Query"])
+app.include_router(documents.router, prefix="/api/v1")
 
 @app.get("/health", tags=["System"])
 async def health_check():

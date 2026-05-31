@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { NyayaButton } from '../../components/ui/NyayaButton';
 import { 
   ShieldCheck, Clock, FileText, CheckCircle, 
-  LayoutDashboard, Settings, AlertCircle, Eye, Info
+  LayoutDashboard, Settings, AlertCircle, Eye, Info, LogOut
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -38,7 +38,7 @@ type Stats = {
 };
 
 export default function AdminVerify() {
-  const { session } = useAuth();
+  const { session, signOut } = useAuth();
   const token = session?.access_token;
   
   const [activeTab, setActiveTab] = useState('pending');
@@ -170,6 +170,15 @@ export default function AdminVerify() {
             <Settings size={18} /> Settings
           </div>
         </nav>
+
+        <div className="p-4 mt-auto">
+          <button 
+            onClick={() => signOut()}
+            className="w-full flex items-center gap-3 py-2.5 px-3 text-sm font-medium text-nyaya-muted hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+          >
+            <LogOut size={18} /> Sign Out
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}

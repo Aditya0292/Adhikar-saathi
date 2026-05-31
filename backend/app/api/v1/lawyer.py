@@ -28,7 +28,8 @@ def _get_lawyer_row(client, auth_id: str):
 
 def _require_lawyer(user: dict):
     """Ensure the authenticated user is a lawyer."""
-    if user.get("user_role") != "lawyer":
+    role = user.get("app_metadata", {}).get("user_role") or user.get("user_metadata", {}).get("role") or user.get("user_role")
+    if role != "lawyer":
         raise HTTPException(status_code=403, detail="Lawyer access required")
     return user["sub"]
 
@@ -455,25 +456,115 @@ async def mark_notification_read(notification_id: str, user: dict = Depends(requ
 @router.get("/me/reviews")
 async def get_my_reviews(user: dict = Depends(require_user)):
     auth_id = _require_lawyer(user)
-    # Reviews table TBD — return mock structure for now
-    return {
-        "summary": {
-            "avg_rating": 0,
-            "total_reviews": 0,
-            "distribution": [
-                {"stars": 5, "count": 0},
-                {"stars": 4, "count": 0},
-                {"stars": 3, "count": 0},
-                {"stars": 2, "count": 0},
-                {"stars": 1, "count": 0},
-            ]
-        },
-        "reviews": []
-    }
+    client = get_service_client()
+    lawyer = _get_lawyer_row(client, auth_id)
+    lawyer_id = lawyer["id"]
+    
+    try:
+        reviews_res = client.table("lawyer_reviews") \
+            .select("id, rating, review_text, created_at, user_auth_id") \
+            .eq("lawyer_id", lawyer_id) \
+            .order("created_at", desc=True) \
+            .execute()
+        
+        reviews = reviews_res.data or []
+        
+        total = len(reviews)
+        avg = round(sum(r["rating"] for r in reviews) / total, 1) if total > 0 else 0.0
+        
+        distribution = [
+            {"stars": s, "count": sum(1 for r in reviews if r["rating"] == s)}
+            for s in [5, 4, 3, 2, 1]
+        ]
+        
+        formatted_reviews = []
+        for r in reviews:
+            user_name = "Anonymous Client"
+            try:
+                user_res = client.table("users").select("email").eq("auth_id", r["user_auth_id"]).execute()
+                if user_res.data:
+                    email = user_res.data[0].get("email", "")
+                    if email:
+                        user_name = email.split("@")[0].capitalize()
+            except Exception:
+                pass
+            
+            formatted_reviews.append({
+                "id": r["id"],
+                "client_name": user_name,
+                "rating": r["rating"],
+                "text": r["review_text"] or "",
+                "created_at": r["created_at"],
+            })
+            
+        return {
+            "summary": {
+                "avg_rating": avg,
+                "total_reviews": total,
+                "distribution": distribution
+            },
+            "reviews": formatted_reviews
+        }
+    except Exception as e:
+        logger.warning(f"Failed to fetch reviews: {e}")
+        return {
+            "summary": {
+                "avg_rating": 0,
+                "total_reviews": 0,
+                "distribution": [{"stars": s, "count": 0} for s in [5, 4, 3, 2, 1]]
+            },
+            "reviews": []
+        }
 
 
 @router.post("/me/reviews/{review_id}/reply")
 async def reply_to_review(review_id: str, data: ReviewReply, user: dict = Depends(require_user)):
     auth_id = _require_lawyer(user)
-    # Reviews table TBD
+    # Reviews table TBD - placeholder response for now
     return {"message": "Reply submitted", "review_id": review_id, "reply": data.reply}
+
+
+# ═══════════════════════════════════════════════════════════════
+# CONSULTATIONS
+# ═══════════════════════════════════════════════════════════════
+
+@router.get("/me/consultations")
+async def get_my_consultations(user: dict = Depends(require_user)):
+    auth_id = _require_lawyer(user)
+    client = get_service_client()
+    lawyer = _get_lawyer_row(client, auth_id)
+    lawyer_id = lawyer["id"]
+    
+    try:
+        res = client.table("client_requests") \
+            .select("*") \
+            .eq("lawyer_id", lawyer_id) \
+            .eq("status", "responded") \
+            .order("responded_at", desc=True) \
+            .execute()
+            
+        consultations = []
+        for r in (res.data or []):
+            slots = r.get("availability_slots") or []
+            
+            # Estimate expiry state
+            is_upcoming = False
+            try:
+                expires_at = datetime.fromisoformat(r.get("expires_at").replace("Z", "+00:00"))
+                is_upcoming = expires_at > datetime.now(timezone.utc)
+            except Exception:
+                pass
+
+            consultations.append({
+                "id": r["id"],
+                "client_name": r.get("user_email", "Client").split("@")[0].capitalize() if r.get("user_email") else "Client",
+                "category": r.get("category", "General").capitalize(),
+                "scheduled_at": r.get("responded_at") or r.get("created_at"),
+                "duration_minutes": 30,
+                "status": "upcoming" if is_upcoming else "completed",
+                "notes": r.get("situation_summary")
+            })
+        return consultations
+    except Exception as e:
+        logger.warning(f"Failed to fetch consultations: {e}")
+        return []

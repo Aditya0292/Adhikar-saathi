@@ -110,22 +110,39 @@ export function ClientRequests({ profile }: ClientRequestsProps) {
   const [filter, setFilter] = useState<FilterStatus>('all');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [respondingTo, setRespondingTo] = useState<ClientRequest | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     (async () => {
+      setLoading(true);
       try {
         const params = new URLSearchParams();
         if (filter !== 'all') params.set('status', filter);
         if (categoryFilter) params.set('category', categoryFilter);
         const data = await api.get(`/api/v1/lawyers/me/requests?${params.toString()}`);
-        if (data && Array.isArray(data) && data.length > 0) {
+        if (active && data && Array.isArray(data)) {
           setRequests(data);
         }
       } catch {
         // Use mock data
+      } finally {
+        if (active) setLoading(false);
       }
     })();
+    return () => {
+      active = false;
+    };
   }, [filter, categoryFilter]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] text-[#6B7A6E]">
+        <Loader2 className="animate-spin text-[#1B4332] mb-3" size={28} />
+        <span className="text-sm font-medium">Loading client requests...</span>
+      </div>
+    );
+  }
 
   const filtered = requests.filter(r => {
     if (filter !== 'all' && r.status !== filter) return false;

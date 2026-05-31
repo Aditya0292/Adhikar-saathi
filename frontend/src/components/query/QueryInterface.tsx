@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Zap, Search, ThumbsUp, ThumbsDown, Copy, ArrowUp, Sparkles, Paperclip, Plus, ChevronDown, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Zap, Search, ThumbsUp, ThumbsDown, Copy, ArrowUp, Sparkles, Paperclip, Plus, ChevronDown, Mic, MicOff, Volume2, VolumeX, Loader2 } from 'lucide-react';
 import { LanguageSelector } from '../ui/LanguageSelector';
 import { CitationCard } from '../ui/CitationCard';
 import { NyayaBadge } from '../ui/NyayaBadge';
 import { useVoiceRecorder } from '../../hooks/useVoiceRecorder';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import { VoiceAdviser } from './VoiceAdviser';
+import { queryFast, queryVerified, QueryRequest } from '../../api/query';
 
 interface Citation {
   index: number;
@@ -25,6 +26,9 @@ interface Message {
   citations?: Citation[];
   confidence?: string;
   law?: string;
+  accuracy?: number;
+  query_type?: string;
+  isVerified?: boolean;
 }
 
 interface ChatSession {
@@ -35,6 +39,75 @@ interface ChatSession {
   mode: 'fast' | 'verified';
   lang: string;
 }
+
+function InlineCitation({ num, citation }: { num: number; citation?: Citation }) {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  if (!citation) {
+    return <span className="font-mono text-nyaya-green-bright font-bold">[{num}]</span>;
+  }
+  
+  const title = citation.caseName 
+    ? `${citation.caseName}${citation.court || citation.year ? ` (${[citation.court, citation.year].filter(Boolean).join(', ')})` : ''}`
+    : `${citation.actName || 'Citation'}${citation.section ? ` - ${citation.section}` : ''}`;
+
+  return (
+    <span 
+      className="relative inline-block"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <span className="mx-0.5 px-1.5 py-0.5 bg-nyaya-green/10 text-nyaya-green-bright hover:bg-nyaya-green/20 hover:text-nyaya-green font-bold font-mono text-xs rounded transition-all cursor-pointer select-none">
+        [{num}]
+      </span>
+      {isHovered && (
+        <span className="absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 bg-white text-slate-800 rounded-xl border border-black/8 shadow-lg p-3 text-xs pointer-events-none animate-fade-in font-sans font-normal leading-relaxed normal-case">
+          <span className="block font-bold text-nyaya-text-dark mb-1">
+            [{num}] {title}
+          </span>
+          <span className="block text-slate-500 line-clamp-3 italic">
+            "{citation.excerpt}"
+          </span>
+          <span className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-white border-r border-b border-black/8 rotate-45 -mt-1"></span>
+        </span>
+      )}
+    </span>
+  );
+}
+
+const renderTextWithCitations = (text: string, citations?: Citation[]) => {
+  const cleanText = text.replace(/\*\*/g, '');
+  if (!citations || citations.length === 0) {
+    return cleanText;
+  }
+  
+  const regex = /\[(\d+)\]/g;
+  const parts: any[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(cleanText)) !== null) {
+    const matchIndex = match.index;
+    const num = parseInt(match[1], 10);
+
+    if (matchIndex > lastIndex) {
+      parts.push(cleanText.substring(lastIndex, matchIndex));
+    }
+
+    const citation = citations.find(c => c.index === num);
+    parts.push(
+      <InlineCitation key={matchIndex} num={num} citation={citation} />
+    );
+
+    lastIndex = regex.lastIndex;
+  }
+
+  if (lastIndex < cleanText.length) {
+    parts.push(cleanText.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : cleanText;
+};
 
 const SUGGESTIONS = [
   { title: "Tenant Eviction", desc: "Can a landlord evict me without a written notice?", query: "Can a landlord evict me without notice in Maharashtra?" },
@@ -54,11 +127,59 @@ export function QueryInterface() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isVoiceAdviserOpen, setIsVoiceAdviserOpen] = useState(false);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Record<string, 'like' | 'dislike'>>({});
+
+  const handleFeedback = (msgId: string, type: 'like' | 'dislike') => {
+    setFeedback(prev => {
+      const next = { ...prev };
+      if (next[msgId] === type) {
+        delete next[msgId];
+      } else {
+        next[msgId] = type;
+      }
+      return next;
+    });
+  };
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const { speakingMsgId, speak } = useTextToSpeech();
+  const { speakingMsgId, isSpeechLoading, speak } = useTextToSpeech();
+
+  const handleCopy = (msgId: string, text: string) => {
+    const cleanText = text.replace(/\*\*/g, '');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(cleanText)
+        .then(() => {
+          setCopiedId(msgId);
+          setTimeout(() => setCopiedId(null), 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy: ', err);
+          fallbackCopyText(msgId, cleanText);
+        });
+    } else {
+      fallbackCopyText(msgId, cleanText);
+    }
+  };
+
+  const fallbackCopyText = (msgId: string, text: string) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      setCopiedId(msgId);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      console.error('Fallback copy failed', err);
+    }
+    document.body.removeChild(textArea);
+  };
 
   const handleRecordingComplete = async (blob: Blob) => {
     setIsTranscribing(true);
@@ -124,65 +245,9 @@ export function QueryInterface() {
     setSessions(updatedSessions);
   };
 
-  const getMockResponse = (q: string, lang: string) => {
-    const lower = q.toLowerCase();
-    if (lower.includes('tenant') || lower.includes('rent') || lower.includes('evict') || lower.includes('किराया') || lower.includes('किरायेदार')) {
-      if (lang === 'hi') {
-        return {
-          text: "नहीं। महाराष्ट्र किराया नियंत्रण अधिनियम, 1999 के तहत किसी भी किरायेदार को उचित नोटिस के बिना जबरन नहीं निकाला जा सकता। मकान मालिक को कानून के अनुसार लिखित नोटिस देना अनिवार्य है। यदि किरायेदार किराया देने को तैयार है, तो उसे कानूनी प्रक्रिया के बिना बेदखल नहीं किया जा सकता।",
-          law: "कानून: महाराष्ट्र किराया नियंत्रण अधिनियम, 1999",
-          citations: [
-            { index: 1, actName: "महाराष्ट्र किराया नियंत्रण अधिनियम, 1999", section: "धारा 15", excerpt: "जब तक किरायेदार किराया देने के लिए तैयार और इच्छुक है, तब तक कोई भी मकान मालिक मकान खाली कराने का हकदार नहीं होगा..." }
-          ]
-        };
-      } else {
-        return {
-          text: "No. Under the Maharashtra Rent Control Act, 1999, a tenant cannot be evicted without a proper written notice. The landlord must follow the due process of law and provide adequate notice (typically 30 to 90 days depending on the agreement terms) before initiating eviction proceedings in court.",
-          law: "Law: Maharashtra Rent Control Act, 1999",
-          citations: [
-            { index: 1, actName: "Maharashtra Rent Control Act, 1999", section: "Section 15", excerpt: "No landlord shall be entitled to the recovery of possession of any premises so long as the tenant pays or is ready and willing to pay..." }
-          ]
-        };
-      }
-    } else if (lower.includes('498') || lower.includes('cruelty') || lower.includes('arrest') || lower.includes('क्रूरता') || lower.includes('गिरफ्तारी')) {
-      if (lang === 'hi') {
-        return {
-          text: "भारतीय कानून (IPC धारा 498A) के तहत, यदि किसी महिला का पति या पति का कोई रिश्तेदार उस महिला के प्रति क्रूरता करता है, तो उसे कारावास से दंडित किया जाएगा जिसकी अवधि तीन वर्ष तक हो सकती है और जुर्माना भी देना होगा। हालांकि, अर्णेश कुमार बनाम बिहार राज्य (2014) के मामले में सुप्रीम कोर्ट ने मनमानी गिरफ्तारियों और इस कानून के दुरुपयोग को रोकने के लिए सख्त निर्देश जारी किए हैं। इसके तहत 7 साल से कम सजा वाले अपराधों में बिना मजिस्ट्रेट के आदेश के सीधे गिरफ्तारी नहीं होनी चाहिए।",
-          citations: [
-            { index: 1, actName: "भारतीय दंड संहिता", section: "धारा 498A", excerpt: "महिला के पति या पति के रिश्तेदार द्वारा उसके साथ क्रूरता करना..." },
-            { index: 2, caseName: "अर्णेश कुमार बनाम बिहार राज्य", court: "सुप्रीम कोर्ट", year: "2014", excerpt: "दहेज प्रताड़ना के मामलों में पुलिस को निर्देश दिया जाता है कि वे आरोपी को सीधे गिरफ्तार न करें, बल्कि पहले धारा 41ए के तहत नोटिस जारी करें।" }
-          ],
-          confidence: "उच्च सटीकता · मतिभ्रम (Hallucination) सुरक्षा जांच उत्तीर्ण"
-        };
-      } else {
-        return {
-          text: "Under Indian law (IPC Section 498A), whoever, being the husband or the relative of the husband of a woman, subjects such woman to cruelty shall be punished with imprisonment for a term which may extend to three years and shall also be liable to fine. Cruelty includes mental and physical harassment, particularly related to dowry demands. However, in the landmark case of Arnesh Kumar v. State of Bihar (2014), the Supreme Court laid down strict guidelines to prevent misuse and arbitrary arrests, requiring police to serve a notice of appearance (under Section 41A CrPC) rather than conducting immediate arrests.",
-          citations: [
-            { index: 1, actName: "Indian Penal Code", section: "Section 498A", excerpt: "Husband or relative of husband of a woman subjecting her to cruelty..." },
-            { index: 2, caseName: "Arnesh Kumar v. State of Bihar", court: "SC", year: "2014", excerpt: "Guidelines established to prevent arbitrary and immediate arrests for offences carrying less than 7 years imprisonment." }
-          ],
-          confidence: "High Confidence · Hallucination guard passed"
-        };
-      }
-    } else {
-      // Fallback response
-      if (lang === 'hi') {
-        return {
-          text: `आपके प्रश्न "${q}" के संबंध में: भारतीय नागरिक अधिकारों और कानूनी ढांचे के तहत प्रत्येक नागरिक को न्याय और मुफ्त कानूनी सलाह पाने का अधिकार है (अनुच्छेद 39A)। आपके द्वारा पूछे गए विषय पर विस्तृत जानकारी एकत्रित की जा रही है। तब तक, कृपया अपने क्षेत्र के प्रमाणित वकील से परामर्श लें या हमारे "Find a Lawyer" सेक्शन का उपयोग करें।`,
-          law: "भारतीय संविधान - अनुच्छेद 39A (समान न्याय और मुफ्त कानूनी सहायता)",
-          citations: []
-        };
-      } else {
-        return {
-          text: `Regarding your query "${q}": Under the Indian legal framework, every citizen is entitled to equal justice and free legal aid. For this specific request, our verified RAG engine recommends referring to the codified laws of India. If your situation is urgent, please click the "Find a Lawyer" tab to consult a registered advocate in your city.`,
-          law: "Constitution of India - Article 39A (Equal justice and free legal aid)",
-          citations: []
-        };
-      }
-    }
-  };
 
-  const submitQuery = (textToSubmit: string) => {
+
+  const submitQuery = async (textToSubmit: string) => {
     const trimmed = textToSubmit.trim();
     if (!trimmed) return;
 
@@ -205,19 +270,47 @@ export function QueryInterface() {
       isNewSession = true;
     }
 
-    setTimeout(() => {
-      const responseData = getMockResponse(trimmed, selectedLang);
-      const assistantMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        sender: 'assistant',
-        text: responseData.text,
-        mode: mode,
-        citations: responseData.citations,
-        confidence: responseData.confidence,
-        law: responseData.law
+    try {
+      const req: QueryRequest = {
+        query: trimmed,
+        language: selectedLang,
+        session_id: activeId
       };
-      setIsTyping(false);
-      
+
+      let assistantMsg: Message;
+
+      if (mode === 'fast') {
+        const response = await queryFast(req);
+        assistantMsg = {
+          id: (Date.now() + 1).toString(),
+          sender: 'assistant',
+          text: response.answer,
+          mode: 'fast',
+          law: response.category !== 'none' ? `Category: ${response.category}` : undefined
+        };
+      } else {
+        const response = await queryVerified(req);
+        assistantMsg = {
+          id: (Date.now() + 1).toString(),
+          sender: 'assistant',
+          text: response.answer,
+          mode: 'verified',
+          citations: response.citations.map(c => ({
+            index: c.index,
+            actName: c.act_name,
+            section: c.section,
+            caseName: c.case_name,
+            court: c.court,
+            year: c.year,
+            excerpt: c.excerpt
+          })),
+          confidence: `${response.confidence.charAt(0).toUpperCase() + response.confidence.slice(1)} Confidence · ${response.hallucination_guard_passed ? 'Verified' : 'Unverified'}`,
+          accuracy: response.accuracy,
+          query_type: response.query_type,
+          isVerified: response.hallucination_guard_passed
+        };
+      }
+
       const finalMessages = [...newMessages, assistantMsg];
       setMessages(finalMessages);
 
@@ -241,7 +334,23 @@ export function QueryInterface() {
         updated = sessions.map(s => s.id === activeId ? newSession : s);
       }
       saveSessionsToStorage(updated);
-    }, 1500);
+    } catch (err: any) {
+      console.error(err);
+      let errorText = "Something went wrong. Please try again.";
+      if (err.message?.includes('503')) {
+        errorText = "This feature is being set up. Try Quick Mode for now.";
+      }
+      
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        sender: 'assistant',
+        text: errorText,
+        mode: mode
+      };
+      setMessages([...newMessages, errorMsg]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const switchSession = (sessionId: string) => {
@@ -274,7 +383,7 @@ export function QueryInterface() {
   const currentSession = sessions.find(s => s.id === currentSessionId);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-220px)] bg-white rounded-3xl border border-black/5 shadow-xs overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-260px)] min-h-[400px] bg-white rounded-3xl border border-black/5 shadow-xs overflow-hidden">
       
       {/* Session Header (Claude Premium Custom Dropdown) */}
       <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-black/[0.04] flex-shrink-0">
@@ -356,7 +465,7 @@ export function QueryInterface() {
         
         {messages.length === 0 ? (
           /* Claude / Grok Empty State */
-          <div className="h-full flex flex-col justify-center items-center max-w-2xl mx-auto text-center py-6">
+          <div className="h-full flex flex-col justify-center items-center max-w-5xl mx-auto w-full text-center py-6">
             <div className="w-12 h-12 rounded-2xl bg-nyaya-green/10 flex items-center justify-center mb-4">
               <img src="/logo.png" alt="NyayaSatya Logo" className="h-8 w-auto object-contain" />
             </div>
@@ -382,29 +491,10 @@ export function QueryInterface() {
                 </button>
               ))}
             </div>
-
-            {/* Previous Chats History list (on empty screen) */}
-            {sessions.length > 0 && (
-              <div className="w-full mt-8 pt-8 border-t border-black/5 text-left">
-                <h4 className="text-[10px] font-bold text-nyaya-muted uppercase tracking-wider mb-3">Recent Conversations</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[140px] overflow-y-auto pr-1">
-                  {sessions.slice(0, 4).map(s => (
-                    <button
-                      key={s.id}
-                      onClick={() => switchSession(s.id)}
-                      className="w-full p-3 bg-white hover:bg-slate-50 border border-black/5 rounded-xl text-left text-xs text-nyaya-text-dark font-semibold transition-colors truncate flex flex-col gap-1 shadow-2xs cursor-pointer"
-                    >
-                      <span className="truncate w-full">{s.title}</span>
-                      <span className="text-[9px] text-nyaya-muted font-medium">{s.timestamp}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         ) : (
           /* Message Thread List */
-          <div className="max-w-3xl mx-auto space-y-8">
+          <div className="max-w-6xl mx-auto w-full space-y-8">
             {messages.map((msg) => (
               <div key={msg.id} className="space-y-4">
                 {msg.sender === 'user' ? (
@@ -425,12 +515,21 @@ export function QueryInterface() {
                         {msg.mode === 'fast' ? (
                           <NyayaBadge variant="fast"><Zap size={10}/> Quick</NyayaBadge>
                         ) : (
-                          <NyayaBadge variant="verified"><Search size={10}/> Verified RAG</NyayaBadge>
+                          <div className="flex items-center gap-4 text-[11px] font-bold tracking-wide mb-2 mt-1">
+                            <span className="text-nyaya-muted">Verified Accuracy:</span>
+                            <span className="bg-nyaya-green-bright text-nyaya-dark px-2 py-0.5 rounded-sm">{msg.accuracy ?? '...'}</span>
+                            
+                            <span className="text-nyaya-muted">Verified:</span>
+                            <span className={msg.isVerified ? "bg-green-100 text-green-800 px-2 py-0.5 rounded-sm" : "bg-amber-100 text-amber-800 px-2 py-0.5 rounded-sm"}>{msg.isVerified ? "Yes" : "No"}</span>
+                            
+                            <span className="text-nyaya-muted">Query Type:</span>
+                            <span className="bg-slate-200 text-slate-700 px-2 py-0.5 rounded-sm">{msg.query_type ?? '...'}</span>
+                          </div>
                         )}
                       </div>
                       
                       <div className="font-sans text-sm md:text-[15px] text-nyaya-text-dark leading-relaxed whitespace-pre-wrap">
-                        {msg.text}
+                        {renderTextWithCitations(msg.text, msg.citations)}
                       </div>
 
                       {msg.law && (
@@ -452,18 +551,42 @@ export function QueryInterface() {
 
                       {/* Action Buttons */}
                       <div className="flex items-center gap-1.5 pt-2">
-                        <button className="p-2 text-nyaya-muted hover:text-nyaya-text-dark hover:bg-black/5 rounded-lg transition-colors cursor-pointer" title="Helpful">
-                          <ThumbsUp size={14} />
-                        </button>
-                        <button className="p-2 text-nyaya-muted hover:text-nyaya-text-dark hover:bg-black/5 rounded-lg transition-colors cursor-pointer" title="Not Helpful">
-                          <ThumbsDown size={14} />
+                        <button 
+                          onClick={() => handleFeedback(msg.id, 'like')}
+                          className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                            feedback[msg.id] === 'like' 
+                              ? 'text-nyaya-green bg-nyaya-green/10' 
+                              : 'text-nyaya-muted hover:text-nyaya-text-dark hover:bg-black/5'
+                          }`}
+                          title={feedback[msg.id] === 'like' ? "Thanks for your feedback!" : "Helpful"}
+                        >
+                          <ThumbsUp size={14} fill={feedback[msg.id] === 'like' ? "currentColor" : "none"} />
                         </button>
                         <button 
-                          onClick={() => navigator.clipboard.writeText(msg.text)} 
-                          className="p-2 text-nyaya-muted hover:text-nyaya-text-dark hover:bg-black/5 rounded-lg transition-colors cursor-pointer" 
+                          onClick={() => handleFeedback(msg.id, 'dislike')}
+                          className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                            feedback[msg.id] === 'dislike' 
+                              ? 'text-red-600 bg-red-50' 
+                              : 'text-nyaya-muted hover:text-nyaya-text-dark hover:bg-black/5'
+                          }`}
+                          title={feedback[msg.id] === 'dislike' ? "Thanks for your feedback!" : "Not Helpful"}
+                        >
+                          <ThumbsDown size={14} fill={feedback[msg.id] === 'dislike' ? "currentColor" : "none"} />
+                        </button>
+                        <button 
+                          onClick={() => handleCopy(msg.id, msg.text)} 
+                          className={`p-2 rounded-lg transition-colors cursor-pointer flex items-center gap-1 ${
+                            copiedId === msg.id 
+                              ? 'text-nyaya-green bg-nyaya-green/10' 
+                              : 'text-nyaya-muted hover:text-nyaya-text-dark hover:bg-black/5'
+                          }`}
                           title="Copy Answer"
                         >
-                          <Copy size={14} />
+                          {copiedId === msg.id ? (
+                            <span className="text-[10px] font-bold px-1">Copied!</span>
+                          ) : (
+                            <Copy size={14} />
+                          )}
                         </button>
                         <button 
                           onClick={() => speak(msg.id, msg.text, selectedLang)} 
@@ -472,9 +595,23 @@ export function QueryInterface() {
                               ? 'text-nyaya-green bg-nyaya-green/5' 
                               : 'text-nyaya-muted hover:text-nyaya-text-dark hover:bg-black/5'
                           }`}
-                          title={speakingMsgId === msg.id ? "Stop Speaking" : "Read Aloud"}
+                          title={
+                            speakingMsgId === msg.id 
+                              ? isSpeechLoading 
+                                ? "Loading Audio..." 
+                                : "Stop Speaking" 
+                              : "Read Aloud"
+                          }
                         >
-                          {speakingMsgId === msg.id ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                          {speakingMsgId === msg.id ? (
+                            isSpeechLoading ? (
+                              <Loader2 size={14} className="animate-spin text-nyaya-green-bright" />
+                            ) : (
+                              <VolumeX size={14} />
+                            )
+                          ) : (
+                            <Volume2 size={14} />
+                          )}
                         </button>
                       </div>
                     </div>
@@ -485,7 +622,7 @@ export function QueryInterface() {
 
             {isTyping && (
               /* Claude Pulsing Typing Indicator */
-              <div className="flex gap-4 items-center max-w-3xl mx-auto">
+              <div className="flex gap-4 items-center max-w-6xl mx-auto">
                 <div className="w-8 h-8 rounded-full bg-nyaya-green/10 flex items-center justify-center flex-shrink-0 shadow-sm">
                   <img src="/logo.png" alt="NyayaSatya Avatar" className="h-5 w-auto object-contain" />
                 </div>
@@ -504,7 +641,7 @@ export function QueryInterface() {
 
       {/* Bottom Chat Input Form (Claude/Grok unified container) */}
       <div className="p-6 bg-white border-t border-black/[0.04]">
-        <div className="max-w-3xl mx-auto bg-white border border-black/8 focus-within:border-black/20 focus-within:ring-4 focus-within:ring-nyaya-green/5 rounded-2xl shadow-sm transition-all duration-200">
+        <div className="max-w-6xl mx-auto bg-white border border-black/8 focus-within:border-black/20 focus-within:ring-4 focus-within:ring-nyaya-green/5 rounded-2xl shadow-sm transition-all duration-200">
           
           {/* Voice error banner */}
           {voiceError && (

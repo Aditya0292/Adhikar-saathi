@@ -12,6 +12,7 @@ from app.utils.redis_client import redis_client
 from app.services import voice_service
 from app.services.adviser_persona import LANGUAGE_PERSONA_MAP
 from app.utils.speech_preprocessor import preprocess_for_speech
+from app.utils.llm_client import generate_chat_completion
 
 logger = logging.getLogger("conversation_service")
 
@@ -65,10 +66,19 @@ async def get_or_create_cached_greeting(language: str) -> bytes:
             logger.error(f"Failed to decode cached greeting: {e}")
 
     # Generate greeting text
-    if lang == "hi" or lang == "ta":
-        greeting_text = "नमस्ते, मैं न्याय हूँ। आज आपकी क्या सहायता कर सकता हूँ?"
-    else:
-        greeting_text = "Hello, I'm Nyaya, your legal adviser. What can I help you with today?"
+    greetings = {
+        "en": "Hello, I'm Nyaya, your legal adviser. What can I help you with today?",
+        "hi": "नमस्ते, मैं न्याय हूँ। आज आपकी क्या सहायता कर सकता हूँ?",
+        "ta": "வணக்கம், நான் நியாயா. இன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?",
+        "te": "నమస్కారం, నేను న్యాయా. ఈరోజు మీకు ఎలా సహాయపడగలను?",
+        "bn": "নমস্কার, আমি ন্যায়। আজ আপনাকে কীভাবে সাহায্য করতে পারি?",
+        "mr": "नमस्कार, मी न्याय आहे. आज मी तुम्हाला कशी मदत करू शकतो?",
+        "gu": "નમસ્તે, હું ન્યાય છું. આજે હું તમને કેવી રીતે મદદ કરી શકું?",
+        "kn": "ನಮಸ್કાર, ನಾನು ನ್ಯಾಯ. ಇಂದು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
+        "ml": "നമസ്കാരം, ഞാൻ ന്യായയാണ്. ഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കണം?",
+        "pa": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਮੈਂ ਨਿਆਇਆ ਹਾਂ। ਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?"
+    }
+    greeting_text = greetings.get(lang, greetings["en"])
 
     # Generate speech audio bytes
     try:
@@ -86,61 +96,19 @@ async def get_or_create_cached_greeting(language: str) -> bytes:
 
 async def call_llm(messages: List[Dict[str, str]], system_prompt: str, max_tokens: int = 1000) -> str:
     """
-    Sends the conversational turn to Claude (Anthropic) if keys are present,
-    otherwise falls back to OpenAI GPT-4o-mini. Returns the generated response.
+    Sends the conversational turn to the universal LLM factory.
     """
-    # 1. Try Anthropic Claude
-    if settings.anthropic_api_key:
-        try:
-            async with httpx.AsyncClient() as client:
-                headers = {
-                    "x-api-key": settings.anthropic_api_key,
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json"
-                }
-                # Translate OpenAI messages format to Anthropic format
-                anthropic_messages = []
-                for msg in messages:
-                    if msg["role"] in ["user", "assistant"]:
-                        anthropic_messages.append({"role": msg["role"], "content": msg["content"]})
-                
-                body = {
-                    "model": "claude-3-haiku-20240307",
-                    "max_tokens": max_tokens,
-                    "system": system_prompt,
-                    "messages": anthropic_messages
-                }
-                res = await client.post("https://api.anthropic.com/v1/messages", headers=headers, json=body, timeout=20.0)
-                res.raise_for_status()
-                result = res.json()
-                return result["content"][0]["text"]
-        except Exception as e:
-            logger.error(f"Claude request failed: {e}. Falling back to OpenAI.")
-
-    # 2. Try OpenAI GPT-4o-mini
-    if settings.openai_api_key:
-        try:
-            async with httpx.AsyncClient() as client:
-                headers = {
-                    "Authorization": f"Bearer {settings.openai_api_key}",
-                    "Content-Type": "application/json"
-                }
-                openai_messages = [{"role": "system", "content": system_prompt}] + messages
-                body = {
-                    "model": "gpt-4o-mini",
-                    "messages": openai_messages,
-                    "max_tokens": max_tokens,
-                    "temperature": 0.7
-                }
-                res = await client.post("https://api.openai.com/v1/chat/completions", headers=headers, json=body, timeout=20.0)
-                res.raise_for_status()
-                result = res.json()
-                return result["choices"][0]["message"]["content"]
-        except Exception as e:
-            logger.error(f"OpenAI request failed: {e}")
-
-    # 3. Fallback mock responses
-    return "I am here to guide you with your legal query. Under Indian Law, you have rights to fair procedure and safety. Please consult a legal professional for specific filings."
+    try:
+        response = await generate_chat_completion(
+            messages=messages,
+            system_prompt=system_prompt,
+            max_tokens=max_tokens,
+            temperature=0.7
+        )
+        return response
+    except Exception as e:
+        logger.error(f"LLM request failed: {e}")
+        return "I am here to guide you with your legal query. Under Indian Law, you have rights to fair procedure and safety. Please consult a legal professional for specific filings."
 
 async def classify_scenario(query_text: str) -> str:
     """

@@ -160,18 +160,7 @@ def preprocess_for_speech(text: str, language: str) -> str:
         else:
             text += " Shall I continue?"
             
-    # 6. Language-specific cleanup for Hindi
-    if lang_prefix == "hi":
-        # Keep Devanagari characters, basic punctuation, and proper nouns (like NyayaSatya)
-        # For simple cleanup, remove stray Roman letters/words unless they start with uppercase (proper nouns)
-        # We can identify lowercase-only words and clean them.
-        words_hi = text.split()
-        cleaned_words = []
-        for w in words_hi:
-            # If word is English (has roman letters) and doesn't start with uppercase, skip it
-            if re.match(r"^[a-z]+$", w):
-                continue
-            cleaned_words.append(w)
-        text = " ".join(cleaned_words)
+    # 6. Language-specific cleanup for Hindi (no longer dropping lowercase Roman words as they contain normalized numbers/currency)
+    pass
         
     return text

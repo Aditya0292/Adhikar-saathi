@@ -381,7 +381,12 @@ async def sos_call_endpoint(req: Request):
     check_rate_limit(req.client.host if req.client else "unknown")
     
     if not VAPI_PRIVATE_KEY:
-        raise HTTPException(status_code=500, detail="VAPI configuration missing")
+        print(f"[WARNING] VAPI configuration missing. Simulating SOS call to target: {TARGET_PHONE_NUMBER or 'registered phone number'}")
+        return {
+            "status": "success",
+            "message": "Call initiated successfully (Mock Mode)",
+            "simulated": True
+        }
 
     headers = {
         "Authorization": f"Bearer {VAPI_PRIVATE_KEY}",
@@ -413,5 +418,5 @@ async def health():
     return {
         "status": "ok",
         "model": "llama-3.3-70b-versatile",
-        "endpoints": ["/", "/chat", "/nearby", "/vapi-chat", "/health"]
+        "endpoints": ["/", "/chat", "/nearby", "/vapi-chat", "/sos-call", "/health"]
     }

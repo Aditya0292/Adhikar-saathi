@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, MessageSquare, Reply, Send } from 'lucide-react';
+import { Star, MessageSquare, Reply, Send, Loader2 } from 'lucide-react';
 import { api } from '../../../api/client';
 import type { ReviewItem, ReviewSummary } from '../../../types/lawyer-dashboard';
 
@@ -51,20 +51,32 @@ export function Reviews() {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
         const data = await api.get('/api/v1/lawyers/me/reviews');
         if (data && data.summary) setSummary(data.summary);
-        if (data && data.reviews && Array.isArray(data.reviews) && data.reviews.length > 0) {
+        if (data && data.reviews && Array.isArray(data.reviews)) {
           setReviews(data.reviews);
         }
       } catch {
         // Use mock
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[300px] text-[#6B7A6E]">
+        <Loader2 className="animate-spin text-[#1B4332] mb-3" size={28} />
+        <span className="text-sm font-medium">Loading reviews...</span>
+      </div>
+    );
+  }
 
   const handleReplySubmit = async (reviewId: string) => {
     if (replyText.length < 5) return;

@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export function useTextToSpeech() {
   const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
+  const [isSpeechLoading, setIsSpeechLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const nativeUtteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
@@ -19,6 +22,7 @@ export function useTextToSpeech() {
     }
     nativeUtteranceRef.current = null;
     setSpeakingMsgId(null);
+    setIsSpeechLoading(false);
   };
 
   const speak = async (msgId: string, text: string, lang: string) => {
@@ -31,10 +35,11 @@ export function useTextToSpeech() {
     // Stop anything currently playing
     stop();
     setSpeakingMsgId(msgId);
+    setIsSpeechLoading(true);
 
     try {
-      // 1. Try calling the backend ElevenLabs TTS API
-      const response = await fetch('http://localhost:8000/api/v1/voice/tts', {
+      // 1. Try calling the backend ElevenLabs/Sarvam TTS API
+      const response = await fetch(`${API_BASE_URL}/api/v1/voice/tts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -44,7 +49,7 @@ export function useTextToSpeech() {
 
       if (response.status === 412) {
         // Precondition Failed: NO_TTS_KEY
-        console.warn('ElevenLabs API key missing in backend. Falling back to browser-native TTS.');
+        console.warn('TTS API key missing in backend. Falling back to browser-native TTS.');
         speakBrowserNative(text, lang);
         return;
       }
@@ -57,8 +62,13 @@ export function useTextToSpeech() {
       const audioUrl = URL.createObjectURL(blob);
       const audio = new Audio(audioUrl);
       
+      audio.onplay = () => {
+        setIsSpeechLoading(false);
+      };
+
       audio.onended = () => {
         setSpeakingMsgId(null);
+        setIsSpeechLoading(false);
         URL.revokeObjectURL(audioUrl);
       };
 
@@ -77,10 +87,21 @@ export function useTextToSpeech() {
   };
 
   const speakBrowserNative = (text: string, lang: string) => {
+    setIsSpeechLoading(false);
     if (!window.speechSynthesis) {
       console.error('Browser does not support Speech Synthesis');
       setSpeakingMsgId(null);
       return;
+    }
+
+    // Force cancel and resume to unstick Chrome's speech synthesis engine
+    try {
+      window.speechSynthesis.cancel();
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      }
+    } catch (e) {
+      console.error('Error canceling speech synthesis:', e);
     }
 
     // Clean text (remove markdown elements, stars, hash tags to make it read naturally)
@@ -128,7 +149,11 @@ export function useTextToSpeech() {
     };
 
     nativeUtteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    
+    // Tiny timeout to let browser finish cancellation state register
+    setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 150);
   };
 
   // Clean up on unmount
@@ -140,6 +165,7 @@ export function useTextToSpeech() {
 
   return {
     speakingMsgId,
+    isSpeechLoading,
     speak,
     stop
   };

@@ -1,282 +1,243 @@
 # NyayaSatya 🏛️
 
-> **Legal answers for every Indian** — AI-powered legal advisory platform with verified lawyer discovery.
-
-NyayaSatya is an Indian legal advisory platform that lets anyone ask legal questions in their language and get AI-generated answers grounded in Indian law, with the option to connect with a verified local lawyer.
-
----
-
-## What Is This?
-
-| Feature | Description |
-|---------|-------------|
-| **Ask a Question** | Get instant AI answers in 10 Indian languages (Fast Mode) or citation-verified answers (Verified Mode) |
-| **Find a Lawyer** | GPS-aware search for verified advocates filtered by specialisation, fee, language, and location |
-| **Document Scanner** | Upload a contract or legal notice — get a risk score, plain-language summary, and key clause highlights |
-| **Lawyer Registration** | Full Indian bar verification flow (Enrollment Number + COP + Govt ID) with admin approval |
+> **AI-Powered Legal Advisory & Verified Advocate Discovery Platform for India**
+>
+> Grounded in Indian Law • Multilingual (10+ Languages) • Real-time OCR Notice & Agreement Analyzer • Conversational Telephony Adapters
 
 ---
 
-## System Architecture & Modules
+## 🚀 Recent Redesign & Live Integrations
 
-The repository is structured as a monorepo consisting of the platform layer, AI service integrations, database schema definitions, and interactive agent adapters.
-
-### Core Application & Platform Layer
-| Module / Area | Component / Path |
-|---|---|
-| **FastAPI Backend** | `backend/app/` — Main API services, endpoints, and utilities |
-| **Authentication Service** | `backend/app/dependencies.py`, `backend/app/supabase_client.py` — Supabase Auth tokens & claims verification |
-| **Lawyer Directory APIs** | `backend/app/api/v1/lawyer_auth.py`, `lawyer_service.py` — Advocate verification & matching algorithms |
-| **Profile Management** | `backend/app/api/v1/user_auth.py` — User preferences and query logs |
-| **Platform Protection** | `backend/app/middleware/rate_limit.py` — Redis-backed sliding window rate limiters |
-| **Secure Storage Client** | `backend/app/services/storage_service.py` — File upload handling with Supabase Storage |
-| **Interactive Client** | `frontend/src/` — React SPA with Zustand state management and Tailwind layout styling |
-| **CI/CD Pipelines** | `.github/workflows/` — Automated test validation and deployment workflows |
-
-### AI, RAG & Agentic Layer
-| Module / Area | Component / Path |
-|---|---|
-| **Fast Mode Service** | `backend/app/services/fast_mode.py` — Real-time direct LLM parsing and multi-language streaming responses |
-| **Verified Mode Service** | `backend/app/services/verified_mode.py` — Citations-based Retrieval-Augmented Generation pipeline |
-| **Document Processing** | `backend/app/services/doc_service.py` — Legal document parser and risk analyzer (OCR + structural evaluation) |
-| **Knowledge Base Embeddings** | `backend/app/models/legal_chunk.py`, `vector_store.py` — Vector indices and search routines |
-| **Corpus Pipeline** | `corpus/` — Data cleaning, tokenization, and embedding scripts for primary legislative texts |
-| **Voice Channel Adapter** | `agents/vapi_voice/` — Vapi.ai webhook handler for phone advisory |
-| **Chat Channel Adapter** | `agents/whatsapp_bot/` — Messaging gateway parser for mobile query support |
+- **Awwwards-Grade Visuals:** Revamped the landing page layout with custom mouse-tracking parallax fields, glowing background vectors, asymmetric grid lines, and smooth rotating SVG seals built around clean, transparent gold and emerald judicial assets.
+- **Fully Live Lawyer Dashboard:** Removed historical mock fallbacks. The advocate dashboard (Client Requests, Reviews, Consultations, and Live Analytics) is now fully integrated with Supabase PostgreSQL endpoints.
+- **Race Condition Loading Shields:** Implemented client-side loading spinners and deferred component mounting to handle asynchronous Supabase session initialization on page refresh, eliminating any flash of mock fallback profiles.
 
 ---
 
-## Integration Contracts
-
-Platform routes leverage abstract service providers to decoupling route controllers from heavy inference jobs. These service contracts must be adhered to for backend extensibility:
-
-```python
-# app/services/fast_mode.py
-class FastModeService:
-    async def answer(self, query: str, language: str, session_id: str) -> FastModeResponse: ...
-    async def stream(self, query: str, language: str, session_id: str): ...  # yields streaming text tokens
-
-# app/services/verified_mode.py
-class VerifiedModeService:
-    async def answer(self, query: str, language: str, session_id: str) -> VerifiedModeResponse: ...
-    async def stream(self, query: str, language: str, session_id: str): ...
-
-# app/services/doc_service.py
-class DocService:
-    async def process(self, document_id: str, storage_path: str) -> None: ...
-    # Updates processing status, summary, risk metrics, flagged elements, and critical clauses
-```
+## 📖 Table of Contents
+1. [What Is NyayaSatya?](#-what-is-nyayasatya)
+2. [System Architecture & Directory Map](#-system-architecture--directory-map)
+3. [User Experience & Portals](#-user-experience--portals)
+4. [AI, RAG & Vision Pipelines](#-ai-rag--vision-pipelines)
+5. [Database Schema & Security](#-database-schema--security)
+6. [Tech Stack](#-tech-stack)
+7. [Running Locally](#%EF%B8%8F-running-locally)
+8. [Environment Configurations](#%EF%B8%8F-environment-configurations)
+9. [Verification Workflow](#-verification-workflow)
 
 ---
 
-## Tech Stack
+## 🏛️ What Is NyayaSatya?
 
-| Layer | Technology |
-|-------|-----------|
-| Backend | FastAPI (Python 3.11), Pydantic v2, structlog |
-| Database | Supabase PostgreSQL 16 + pgvector + Row Level Security |
-| Auth | Supabase Auth (Email/Password + Google OAuth) |
-| Storage | Supabase Storage (private bucket for lawyer docs) |
-| Cache / Rate Limit | Redis 7 |
-| Frontend | React 18, TypeScript strict, Vite, Tailwind CSS |
-| State | Zustand + TanStack Query v5 |
-| Deploy | Railway (backend) + Vercel (frontend) |
+NyayaSatya is a modern digital platform designed to bridge the gap between complex Indian legislation and the everyday citizen. By combining state-of-the-art Generative AI with a verified directory of local legal practitioners, it offers immediate, grounded guidance in the user's native tongue.
+
+| Feature | Capabilities & Implementations |
+| :--- | :--- |
+| **Instant Advisory** | Dual-mode reasoning: **Fast Mode** (streaming conversational answers) or **Verified Mode** (hybrid vector RAG + Cohere reranking). |
+| **Multilingual Support** | Query and receive structured replies in **10 Indian languages** (Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Odia, and English). |
+| **Document Scanner** | OCR notice analyzer checking **12 document types** (FIRs, Summons, Rental Deeds, etc.) extracting risk metrics (0-1.0), summaries, key clauses, and critical dates. |
+| **Advocate Discovery** | GPS-aware search matching clients to vetted local lawyers based on specialisation, fee parameters, and spoken languages. |
+| **Interactive Voice Portal** | Telephony webhook integrations (Vapi.ai) with audio translation, persona mapping, and Redis caching. |
 
 ---
 
-## Project Structure
+## 📁 System Architecture & Directory Map
 
 ```
 nyayasatya/
-├── backend/          ← FastAPI application, routers, services, and tests
-├── frontend/         ← React Single Page Application (UI elements & state)
-├── supabase/         ← Migration scripts, RLS rules, and auth triggers
-├── corpus/           ← Legal knowledge base documents, extraction and embedding tools
-├── agents/           ← Specialized conversational channel handlers (Voice & WhatsApp)
-├── .github/          ← CI/CD pipeline pipelines
-├── docker-compose.yml
-└── README.md
+├── backend/                  ← FastAPI application
+│   ├── app/
+│   │   ├── api/v1/           ← Controllers (auth, lawyer, admin, voice, doc, query)
+│   │   ├── middleware/       ← Rate limiters (Redis), Auth verification
+│   │   ├── models/           ← Pydantic schemas and database models
+│   │   ├── services/         ← Core business logic
+│   │   │   ├── case_predictor/     ← Predicts case weights & complexity metrics
+│   │   │   └── hallucination_guard/ ← Sentence-level RAG faithfulness verification
+│   │   └── utils/            ← Redis adapters, LLM wrappers, speech preprocessors
+│   └── tests/                ← Pytest test suites (auth, lawyer, query routes)
+├── frontend/                 ← React SPA (TypeScript + Zustand + Tailwind + Vite)
+│   ├── src/
+│   │   ├── api/              ← Live Axios/Fetch clients for API routes
+│   │   ├── components/       ← UI layouts (home hero, dashboard panels)
+│   │   ├── context/          ← Session managers (AuthContext)
+│   │   ├── pages/            ← Top-level route pages (Client, Lawyer, Admin dashboards)
+│   │   └── types/            ← Type declarations for lawyer stats, calendar items
+├── supabase/                 ← Database migrations, Row Level Security rules, and seeds
+└── agents/                   ← Telephony adapters (Vapi webhook) and messaging gateways
 ```
 
 ---
 
-## Running Locally
+## 👥 User Experience & Portals
 
-### Prerequisites
-- Docker Desktop
-- Python 3.11+
-- Node.js 20+
-- Supabase CLI (`npm install -g supabase`)
+### 1. Client Portal
+- **Immersive Query Area:** Input natural queries in local languages, selecting either Fast or Verified responses.
+- **RAG Citations Panel:** Displays verified document highlights, specific statutory articles, and confidence scores.
+- **Notice & Contract Analyzer:** Dropzone uploads that immediately extract clause commitments, timeline dates, and legal cross-references.
+- **Advocate Search:** Refine search fields to find local practitioners, review profiles, check fees, and book video consults.
 
-### 1. Start Infrastructure
+### 2. Lawyer Dashboard
+- **Live Statistics Overview:** Real-time profile views, active rating counters, response rate calculations, and visibility toggles.
+- **Lead Inbox:** Intake board detailing client query summaries, location details, and active countdown indicators for incoming requests.
+- **Consultation Calendar:** Integrated monthly view for scheduling and joining secure, in-platform video advisory links.
+- **Review Feed:** Interactive list of ratings with options for advocates to publish direct, public replies.
 
+### 3. Verification Desk (Admin Only)
+- **Document Audit Interface:** Access to private Supabase storage links to review submitted certificates and identity papers.
+- **Action Dashboard:** Fast action triggers to **Verify** or **Reject** applications with descriptive audit trails.
+
+---
+
+## 🤖 AI, RAG & Vision Pipelines
+
+```mermaid
+graph TD
+    UserQuery[Client Query] --> Classify[Query Category Classifier]
+    Classify -->|Other| Fallback[Grounded Out-of-Scope Warning]
+    Classify -->|Legal| Translate[English Query Translation]
+    Translate --> HyDE[HyDE Query Expansion]
+    HyDE --> Hybrid[Hybrid Vector RAG: Pinecone Dense + BM25 Sparse]
+    Hybrid --> Cohere[Cohere Multilingual Reranking]
+    Cohere --> GenPrompt[Contextual Answer Assembly]
+    GenPrompt --> Guard[Hallucination Guard: Faithfulness Check]
+    Guard --> Output[Verified Multilingual Output]
+```
+
+### RAG Integration Details (`backend/app/services/verified_mode.py`)
+- **Hybrid Retrieval:** Dense retrieval runs via `SentenceTransformer('mixedbread-ai/mxbai-embed-large-v1')` against Pinecone; sparse token retrieval uses a pre-calculated BM25 encoder file.
+- **Reranker:** Cohere's `rerank-multilingual-v3.0` evaluates retrieval candidates, discarding low-relevance metadata indices.
+- **Hallucination Guard:** Runs a self-check evaluation loop on candidate answers, validating factual fidelity against source text blocks, assigning a confidence rating, and returning structured citations.
+
+### Document Analysis Pipeline (`backend/app/services/doc_service.py`)
+- **OCR Vision Parser:** Scans and extracts layouts using `pdfplumber` for digital PDFs, and triggers OpenAI Vision API models (`gpt-4o-mini`) for scanned images or photos.
+- **Parallel Analyzers:** Initiates concurrent asynchronous tasks evaluating document classes, extracting key clauses with plain explanations, isolating critical dates with relative time remaining, and linking files to standard Indian legal acts.
+- **Aggregated Risk Gauge:** Combines severity flags into a single threat metric (low, medium, high, critical), warning users of lock-in constraints, asymmetric terminations, or criminal liabilities.
+
+---
+
+## 🔒 Database Schema & Security
+
+NyayaSatya stores information on a Supabase PostgreSQL instance secured by **Row-Level Security (RLS)**:
+- **`profiles`:** Client details, readable and writable only by the authenticated owner.
+- **`lawyer_profiles`:** Detailed credentials for registered advocates. Publicly searchable only if `is_verified` is true; write access is restricted to the owning advocate or administrators.
+- **`client_requests`:** Connects clients and lawyers. Row read and write policies ensure that only the requesting client and the matched advocate can view transaction communications.
+- **`reviews`:** Grounded reviewer inputs, publicly visible to foster trust but editable only by verified clients.
+- **`consultations`:** Private records for booked video consults.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Backend:** FastAPI (Python 3.11), Pydantic v2, structlog
+- **Database:** Supabase PostgreSQL 16 + pgvector
+- **Retrieval Engine:** Pinecone, Cohere Rerank API, SentenceTransformers
+- **In-Memory Cache:** Redis 7 (rate-limiting and TTS audio buffer storage)
+- **Frontend Framework:** React 18 (TypeScript), Zustand, Tailwind CSS, Vite
+- **Telephony API:** Vapi.ai Webhooks
+
+---
+
+## ⚡ Running Locally
+
+### 1. Spin Up Core Infrastructure
+Docker Compose provisions localized PostgreSQL (with pgvector) and Redis instances:
 ```bash
-# Spin up Postgres (with pgvector) + Redis
 docker compose up -d
-
-# Verify both services are healthy
 docker compose ps
 ```
 
 ### 2. Backend Setup
-
 ```bash
 cd backend
-
-# Create virtual environment
 python -m venv .venv
 .venv\Scripts\activate          # Windows
 # source .venv/bin/activate    # Mac/Linux
 
-# Install dependencies
 pip install -e ".[dev]"
-
-# Copy and fill in your Supabase credentials
 cp .env.example .env
-# Edit .env with your SUPABASE_URL, SUPABASE_ANON_KEY, etc.
+# Edit .env with your LLM, Supabase, Cohere, and Pinecone API keys.
 
-# Run database migrations (Supabase)
-# Option A: Supabase CLI (recommended)
+# Run migrations to provision tables and RLS rules
 supabase db push
 
-# Option B: Paste SQL manually in Supabase SQL editor
-# Run: supabase/migrations/001_schema.sql
-#      supabase/migrations/002_rls.sql
-#      supabase/migrations/003_triggers.sql
-
-# Start FastAPI dev server
+# Start development API server
 uvicorn app.main:app --reload --port 8000
 ```
-
-API docs: http://localhost:8000/docs
+Interactive Swagger Documentation: `http://localhost:8000/docs`
 
 ### 3. Frontend Setup
-
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Copy and fill in Supabase keys
 cp .env.example .env.local
-# Edit .env.local with VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_API_URL
+# Edit .env.local with VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, and VITE_API_URL.
 
-# Generate TypeScript types from Supabase schema
+# Auto-generate local TS definitions from your Supabase instance
 npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/lib/database.types.ts
 
-# Start dev server
 npm run dev
 ```
+Client Interface: `http://localhost:5173`
 
-Frontend: http://localhost:5173
-
----
-
-## Running Tests
-
+### 4. Running Test Suites
 ```bash
 cd backend
-
-# Run all tests
-pytest
-
-# Run with coverage report
-pytest --cov=app --cov-report=term-missing
-
-# Run specific test files
+pytest -v
+# Run specific test modules
 pytest tests/test_lawyer.py -v
-pytest tests/test_auth.py -v
-pytest tests/test_query_routes.py -v   # AI services are mocked here
 ```
 
 ---
 
-## Supabase Setup (One-Time)
+## ⚙️ Environment Configurations
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to **Settings → API** → copy `URL`, `anon key`, `service_role key`, `JWT secret`
-3. Go to **Authentication → Providers** → enable Email, Google OAuth
-4. Go to **Storage** → create these buckets:
-   - `lawyer-documents` — **Private**
-   - `lawyer-photos` — **Public**
-   - `user-documents` — **Private**
-5. Run all 3 migration files in the **SQL Editor**
-6. Seed sample data: run `supabase/seed.sql`
-
----
-
-## Lawyer Verification Flow
-
-```
-Lawyer fills form (Step 1: text details)
-         ↓
-Supabase Auth account created
-         ↓
-Lawyer uploads 3 documents (Step 2):
-  • Bar Council Enrollment Certificate
-  • Certificate of Practice (AIBE) — if enrolled after 2010
-  • Government Photo ID (Aadhaar / Voter ID / Passport)
-         ↓
-Documents stored in private Supabase Storage bucket
-         ↓
-Admin receives Slack notification
-         ↓
-Admin reviews → Approve or Reject (with reason)
-         ↓
-Lawyer gets email notification
-```
-
----
-
-## Environment Variables
-
-### Backend (`backend/.env`)
+### Backend Settings (`backend/.env`)
 ```env
 SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...      # never expose this
-SUPABASE_JWT_SECRET=                  # Settings → API → JWT Secret
+SUPABASE_SERVICE_ROLE_KEY=eyJ...      # Kept secure, never exposed on client
+SUPABASE_JWT_SECRET=                  # Settings -> API -> JWT Secret
 REDIS_URL=redis://localhost:6379/0
 MAX_FREE_QUERIES_PER_DAY=5
 FAST_MODE_ENABLED=true
-VERIFIED_MODE_ENABLED=false
-DOC_SCANNER_ENABLED=false
-SLACK_WEBHOOK_URL=
+VERIFIED_MODE_ENABLED=true
+DOC_SCANNER_ENABLED=true
+SLACK_WEBHOOK_URL=                    # Admin notification hooks
+OPENAI_API_KEY=                       # Vision, Fast Mode & Guard LLM endpoints
+COHERE_API_KEY=                       # Cohere reranker
+PINECONE_API_KEY=                     # Pinecone index integration
+PINECONE_INDEX_NAME=                  # Vector database target index
 ```
 
-### Frontend (`frontend/.env.local`)
+### Frontend Settings (`frontend/.env.local`)
 ```env
 VITE_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
 VITE_API_URL=http://localhost:8000
-VITE_GOOGLE_MAPS_KEY=
 ```
 
 ---
 
-## CI/CD
+## 🛡️ Verification Workflow
 
-| Workflow | Trigger | What it does |
-|----------|---------|--------------|
-| `ci.yml` | Push to any branch | Lint + type-check + run tests |
-| `deploy.yml` | Push to `main` | Deploy backend to Railway, frontend to Vercel |
+```
+Lawyer registers via multi-step frontend form
+                     ↓
+Auth record created & document placeholders stored in Supabase
+                     ↓
+Lawyer uploads verification proofs:
+  • Bar Council Enrollment Certificate (PDF)
+  • Certificate of Practice (AIBE)
+  • Government Photo Identity Card
+                     ↓
+Files saved in private, RLS-secured Supabase storage buckets
+                     ↓
+Slack webhook notifies Admin team of pending applicant
+                     ↓
+Admin inspects PDFs, verifies, and triggers Approval or Rejection
+                     ↓
+Lawyer profile updated, triggers email notification, and goes live in LawyerFinder
+```
 
 ---
-
-## Development Roadmap
-
-| Stage / Phase | Task Description |
-|---|---|
-| **Phase 1: Setup** | Repository initialization, local infrastructure configurations, and schema provisioning |
-| **Phase 2: Auth & DB** | Supabase project establishment: Auth providers setup, private/public storage buckets provisioning, and SQL schema migrations |
-| **Phase 3: Core API** | Backend client integration: JWT token verification dependencies, internal rate-limiting middleware, and Lawyer Registration APIs |
-| **Phase 4: Integrations** | User profiles routing, document parsing hooks, and abstract legal query service structures |
-| **Phase 5: Client App** | React SPA implementation: Authentication interfaces, multiphase registration wizards, and responsive views |
-| **Phase 6: UI Blocks** | Dynamic responsive elements creation: Query inputs, live citation viewers, maps matching layouts, and admin review boards |
-| **Phase 7: End-to-End** | Cross-linking front and back channels, validation workflows testing, RAG stubs wiring, and environment deployments (Vercel & Railway) |
-
----
-
-*NyayaSatya — Legal answers for every Indian 🇮🇳*
-
+*NyayaSatya — Empowering every Indian with accessible, verified legal guidance.*

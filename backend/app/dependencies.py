@@ -14,9 +14,8 @@ logger = structlog.get_logger()
 
 async def get_current_user(request: Request) -> Optional[Dict[str, Any]]:
     """
-    Verifies Supabase JWT from Authorization header.
-    Returns the decoded JWT claims dict or None if anonymous.
-    Claims include: sub (auth_id), email, user_role, lawyer_verified
+    Verifies Supabase JWT. First tries local verification using SUPABASE_JWT_SECRET
+    for speed, then falls back to Supabase Auth API if local verification fails.
     """
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
@@ -24,18 +23,40 @@ async def get_current_user(request: Request) -> Optional[Dict[str, Any]]:
 
     token = auth_header.split(" ", 1)[1]
     try:
-        from app.supabase_client import get_service_client
-        # 1. Securely validate token against Supabase Auth API
-        res = get_service_client().auth.get_user(token)
-        if not res or not res.user:
-            return None
-            
-        # 2. Extract custom claims locally (signature already verified by Supabase)
-        claims = jwt.decode(token, "", options={"verify_signature": False, "verify_aud": False})
+        # Extract the algorithm from the token header first
+        header = jwt.get_unverified_header(token)
+        alg = header.get("alg", "HS256")
+        
+        # Asymmetric signatures (ES256/RS256) require Supabase's public keys.
+        # Direct them to the network fallback immediately and quietly.
+        if alg in ["ES256", "RS256"]:
+            raise ValueError(f"Asymmetric algorithm {alg} requires network verification")
+
+        # Try local verification for symmetric HS256
+        claims = jwt.decode(
+            token,
+            settings.supabase_jwt_secret,
+            algorithms=["HS256"],
+            options={"verify_aud": False}
+        )
         return claims
-    except Exception as e:
-        logger.error("jwt_verification_failed", error=str(e))
-        return None
+    except Exception as local_err:
+        # Only log warning for unexpected local validation errors (like actual signature/key issues)
+        if "requires network verification" not in str(local_err):
+            logger.warning("local_jwt_verification_failed", error=str(local_err))
+        try:
+            from app.supabase_client import get_service_client
+            # Fallback to Supabase Auth API over the network
+            res = get_service_client().auth.get_user(token)
+            if not res or not res.user:
+                return None
+                
+            # Extract claims without signature verification (since Supabase already verified it)
+            claims = jwt.decode(token, "", options={"verify_signature": False, "verify_aud": False})
+            return claims
+        except Exception as network_err:
+            logger.error("jwt_verification_failed", error=str(network_err))
+            return None
 
 async def require_user(user: Optional[Dict[str, Any]] = Depends(get_current_user)) -> Dict[str, Any]:
     if user is None:

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   Eye, Inbox, TrendingUp, TrendingDown, Star, AlertTriangle,
-  ChevronRight, Shield, ArrowUpRight, Info
+  ChevronRight, Shield, ArrowUpRight, Info, Loader2
 } from 'lucide-react';
 import { api } from '../../../api/client';
 import type {
@@ -64,6 +64,7 @@ export function Overview({ profile, onNavigate }: OverviewProps) {
   const [activity, setActivity] = useState<ActivityItem[]>(MOCK_ACTIVITY);
   const [ranking, setRanking] = useState<RankingInsight>(MOCK_RANKING);
   const [hoveredTip, setHoveredTip] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -74,13 +75,24 @@ export function Overview({ profile, onNavigate }: OverviewProps) {
           api.get('/api/v1/lawyers/me/ranking'),
         ]);
         if (s) setStats(s);
-        if (a && Array.isArray(a)) setActivity(a.length > 0 ? a : MOCK_ACTIVITY);
+        if (a && Array.isArray(a)) setActivity(a);
         if (r && r.rank) setRanking(r);
       } catch {
-        // Use mock data
+        // Fall back to mock stats on error
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-[#6B7A6E]">
+        <Loader2 className="animate-spin text-[#1B4332] mb-3" size={28} />
+        <span className="text-sm font-medium">Loading dashboard overview...</span>
+      </div>
+    );
+  }
 
   const rateColor = stats.response_rate >= 80 ? 'text-emerald-600' : stats.response_rate >= 60 ? 'text-amber-600' : 'text-red-500';
   const rateBarColor = stats.response_rate >= 80 ? 'bg-emerald-500' : stats.response_rate >= 60 ? 'bg-amber-500' : 'bg-red-500';
