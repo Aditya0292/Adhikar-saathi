@@ -2,6 +2,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useEffect } from 'react';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 import { fadeUp, staggerChildren, EASING } from '../../lib/motion';
+import HeroLaptopShowcase from './HeroLaptopShowcase';
 
 export default function Hero() {
   // Mouse Parallax Values
@@ -101,7 +102,7 @@ export default function Hero() {
         {/* Courthouse Pillars - Right Floating Element */}
         <motion.div 
           style={{ x: transX2, y: transY2, rotate: rotate2 }}
-          className="absolute right-[3%] top-[48%] w-[230px] h-[230px] filter drop-shadow-[0_20px_50px_rgba(201,168,76,0.12)] select-none opacity-80"
+          className="absolute right-[3%] top-[20%] w-[230px] h-[230px] filter drop-shadow-[0_20px_50px_rgba(201,168,76,0.12)] select-none opacity-80"
           animate={{ y: [0, 10, 0] }}
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
         >
@@ -118,7 +119,7 @@ export default function Hero() {
       </div>
 
       {/* Main Hero Content */}
-      <div className="relative z-20 max-w-4xl mx-auto px-6 flex flex-col items-center text-center pb-20">
+      <div className="relative z-20 max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
         
         {/* Eyebrow badge */}
         <motion.div
@@ -215,13 +216,18 @@ export default function Hero() {
             Register as a Lawyer
           </button>
         </motion.div>
+      </div>
 
-        {/* Trust Signals */}
+      {/* Hero Laptop Showcase Component */}
+      <HeroLaptopShowcase />
+
+      {/* Trust Signals Below Laptop */}
+      <div className="relative z-20 w-full flex flex-col items-center text-center pb-20">
         <motion.p 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1.6 }}
-          className="mt-14 text-nyaya-muted/70 text-xs font-sans tracking-widest uppercase flex items-center gap-2.5"
+          className="text-nyaya-muted/70 text-xs font-sans tracking-widest uppercase flex items-center gap-2.5"
         >
           <span>Free for individuals</span>
           <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
@@ -229,7 +235,6 @@ export default function Hero() {
           <span className="w-1.5 h-1.5 rounded-full bg-white/20" />
           <span>Built for Bharat</span>
         </motion.p>
-
       </div>
 
       {/* Down Indicator */}
