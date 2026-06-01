@@ -238,7 +238,7 @@ function AdvocateDashboardMock() {
         <div className="space-y-4">
           {/* Logo */}
           <div className="flex items-center gap-1.5 px-1 py-0.5">
-            <span className="text-nyaya-green-bright text-base md:text-lg font-serif">⚖️</span>
+            <img src="/logo.png" className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 object-contain" alt="NyayaSatya Logo" />
             <span className="font-serif font-bold text-nyaya-text hidden md:inline tracking-wide text-xs">NyayaSatya</span>
           </div>
 
