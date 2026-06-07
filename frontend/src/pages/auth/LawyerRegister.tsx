@@ -160,8 +160,8 @@ export default function LawyerRegister() {
         
         <div className="relative z-10">
           <Link to="/" className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-2xl tracking-tight hover:opacity-80 transition-opacity w-max">
-            <img src="/logo.png" alt="NyayaSatya Logo" className="h-8 w-auto object-contain brightness-0 invert" />
-            <span>NyayaSatya</span> 
+            <img src="/logo.png" alt="Adhikar साथी Logo" className="h-8 w-auto object-contain brightness-0 invert" />
+            <span>Adhikar साथी</span> 
             <span className="text-sm font-sans uppercase tracking-widest text-nyaya-gold ml-2 border border-nyaya-gold/30 px-2 py-0.5 rounded">For Advocates</span>
           </Link>
         </div>
@@ -209,7 +209,7 @@ export default function LawyerRegister() {
         </div>
         
         <div className="relative z-10 text-nyaya-muted text-xs">
-          © 2026 NyayaSatya. All rights reserved.
+          © 2026 Adhikar साथी. All rights reserved.
         </div>
       </div>
 
@@ -218,8 +218,8 @@ export default function LawyerRegister() {
         {/* Mobile Header */}
         <div className="lg:hidden mb-8">
           <Link to="/" className="font-serif font-semibold text-nyaya-text-dark flex items-center gap-2 text-xl tracking-tight">
-            <img src="/logo.png" alt="NyayaSatya Logo" className="h-7 w-auto object-contain" />
-            <span>NyayaSatya</span> <span className="text-xs font-sans text-nyaya-gold">Advocates</span>
+            <img src="/logo.png" alt="Adhikar साथी Logo" className="h-7 w-auto object-contain" />
+            <span>Adhikar साथी</span> <span className="text-xs font-sans text-nyaya-gold">Advocates</span>
           </Link>
         </div>
 

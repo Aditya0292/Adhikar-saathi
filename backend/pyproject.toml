@@ -1,5 +1,5 @@
 [project]
-name = "nyayasatya-backend"
+name = "adhikarsathi-backend"
 version = "1.0.0"
 description = "FastAPI backend engine for Indian Legal Advisory Platform"
 requires-python = ">=3.11"
@@ -27,7 +27,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-name = "nyayasatya-backend"
+name = "adhikarsathi-backend"
 version = "1.0.0"
 description = "FastAPI backend engine for Indian Legal Advisory Platform"
 authors = ["Aditya <aditya@example.com>"]

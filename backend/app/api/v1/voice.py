@@ -318,9 +318,9 @@ async def end_session(
 async def main_sos_call_endpoint(request: Request):
     import httpx
     
-    if not settings.vapi_private_key:
+    if settings.vapi_mock_mode or not settings.vapi_private_key:
         logger.warning(
-            f"Vapi configuration missing on the backend. "
+            f"Vapi configuration in Mock Mode or key missing. "
             f"Simulating SOS call to target: {settings.target_phone_number or 'registered phone number'}"
         )
         return {
@@ -352,6 +352,14 @@ async def main_sos_call_endpoint(request: Request):
             logger.warning(f"vapi_call_response: status_code={resp.status_code}, body={resp_json}")
             resp.raise_for_status()
             return {"status": "success", "message": "Call initiated successfully"}
+    except httpx.HTTPStatusError as e:
+        try:
+            error_body = e.response.json()
+            error_msg = error_body.get("message", str(e))
+        except Exception:
+            error_msg = e.response.text or str(e)
+        logger.error(f"Vapi /sos-call HTTP status error: {error_msg}")
+        raise HTTPException(status_code=400, detail=f"Vapi Error: {error_msg}")
     except Exception as e:
         logger.error(f"Vapi /sos-call error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to initiate SOS call: {str(e)}")

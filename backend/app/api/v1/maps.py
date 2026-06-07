@@ -1,0 +1,259 @@
+import asyncio
+import structlog
+from typing import Optional, List, Dict
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
+import httpx
+import json
+
+from app.config import settings
+from app.utils.redis_client import redis_client
+from app.utils.geo import haversine_km
+
+logger = structlog.get_logger()
+router = APIRouter(prefix="/maps", tags=["Places Map Integration"])
+
+class PlaceItem(BaseModel):
+    id: str
+    name: str
+    address: str
+    latitude: float
+    longitude: float
+    types: List[str]
+    distance_km: float
+
+class NearbyPlacesResponse(BaseModel):
+    category: str
+    places: List[PlaceItem]
+    center: Dict[str, float]
+
+def get_mock_places(lat: float, lon: float, category: str) -> List[Dict]:
+    """
+    Generate realistic mock places around the coordinates as fallback.
+    """
+    mock_data = []
+    
+    if category == "police":
+        mock_data = [
+            {
+                "id": "mock_p1",
+                "name": "Central District Police Station",
+                "address": "Main Bazar Rd, Near City Center",
+                "lat_offset": 0.008,
+                "lon_offset": -0.005,
+                "types": ["police", "establishment"]
+            },
+            {
+                "id": "mock_p2",
+                "name": "Suburban Police HQ",
+                "address": "Sector 4 Outer Ring Rd",
+                "lat_offset": -0.012,
+                "lon_offset": 0.015,
+                "types": ["police", "establishment"]
+            },
+            {
+                "id": "mock_p3",
+                "name": "Traffic Police Booth & Station",
+                "address": "Junction 12, Station Road",
+                "lat_offset": 0.003,
+                "lon_offset": 0.009,
+                "types": ["police", "establishment"]
+            }
+        ]
+    elif category == "court":
+        mock_data = [
+            {
+                "id": "mock_c1",
+                "name": "District & Sessions Court Complex",
+                "address": "Court Road, Civil Lines",
+                "lat_offset": 0.015,
+                "lon_offset": 0.004,
+                "types": ["courthouse", "establishment"]
+            },
+            {
+                "id": "mock_c2",
+                "name": "Family & Consumer Disputes Forum",
+                "address": "Nyaya Marg, Near Fountain Chowk",
+                "lat_offset": -0.005,
+                "lon_offset": -0.012,
+                "types": ["courthouse", "establishment"]
+            }
+        ]
+    elif category == "legal_aid":
+        mock_data = [
+            {
+                "id": "mock_l1",
+                "name": "District Legal Services Authority (DLSA)",
+                "address": "Room 14, Ground Floor, District Court Complex",
+                "lat_offset": 0.014,
+                "lon_offset": 0.005,
+                "types": ["legal_aid", "local_government_office", "establishment"]
+            },
+            {
+                "id": "mock_l2",
+                "name": "State Legal Aid Clinic (Pro-Bono Center)",
+                "address": "Community Hall Plaza, Block C",
+                "lat_offset": -0.002,
+                "lon_offset": 0.006,
+                "types": ["legal_aid", "non_profit", "establishment"]
+            }
+        ]
+        
+    places = []
+    for item in mock_data:
+        p_lat = lat + item["lat_offset"]
+        p_lon = lon + item["lon_offset"]
+        dist = haversine_km(lat, lon, p_lat, p_lon)
+        places.append({
+            "id": item["id"],
+            "name": item["name"],
+            "address": item["address"],
+            "latitude": p_lat,
+            "longitude": p_lon,
+            "types": item["types"],
+            "distance_km": round(dist, 2)
+        })
+        
+    # Sort by distance
+    places.sort(key=lambda x: x["distance_km"])
+    return places
+
+@router.get("/nearby", response_model=NearbyPlacesResponse)
+async def get_nearby_places(
+    lat: float = Query(...),
+    lon: float = Query(...),
+    category: str = Query(..., description="Category: police, court, legal_aid"),
+    radius_meters: int = Query(5000, ge=500, le=50000)
+):
+    """
+    Get nearby police stations, courts, or legal aid centers using Google Places API (New).
+    """
+    if category not in ["police", "court", "legal_aid"]:
+        raise HTTPException(status_code=400, detail="Invalid category. Must be 'police', 'court', or 'legal_aid'.")
+        
+    cache_key = f"places_nearby:lat={lat}:lon={lon}:cat={category}:rad={radius_meters}"
+    
+    try:
+        cached = await redis_client.get(cache_key)
+        if cached:
+            return NearbyPlacesResponse.model_validate_json(cached)
+    except Exception as e:
+        logger.warning(f"Failed to read from cache: {e}")
+        
+    # Check if Google Maps API key is available
+    if not settings.google_maps_api_key:
+        logger.info("Google Maps API Key not set, using mock places fallback.")
+        mock_places = get_mock_places(lat, lon, category)
+        res = NearbyPlacesResponse(
+            category=category,
+            places=[PlaceItem(**p) for p in mock_places],
+            center={"latitude": lat, "longitude": lon}
+        )
+        return res
+
+    # Select Places New endpoint based on category
+    api_url = "https://places.googleapis.com/v1/places:searchNearby"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Goog-Api-Key": settings.google_maps_api_key,
+        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.types"
+    }
+
+    if category == "police":
+        body = {
+            "includedTypes": ["police"],
+            "maxResultCount": 10,
+            "locationRestriction": {
+                "circle": {
+                    "center": {"latitude": lat, "longitude": lon},
+                    "radius": float(radius_meters)
+                }
+            }
+        }
+    elif category == "court":
+        body = {
+            "includedTypes": ["courthouse"],
+            "maxResultCount": 10,
+            "locationRestriction": {
+                "circle": {
+                    "center": {"latitude": lat, "longitude": lon},
+                    "radius": float(radius_meters)
+                }
+            }
+        }
+    else: # legal_aid
+        # Use Text Search for legal aid
+        api_url = "https://places.googleapis.com/v1/places:searchText"
+        body = {
+            "textQuery": "legal aid",
+            "maxResultCount": 10,
+            "locationBias": {
+                "circle": {
+                    "center": {"latitude": lat, "longitude": lon},
+                    "radius": float(radius_meters)
+                }
+            }
+        }
+
+    places = []
+    
+    async with httpx.AsyncClient() as http_client:
+        try:
+            response = await http_client.post(api_url, headers=headers, json=body, timeout=12.0)
+            
+            if response.status_code == 200:
+                data = response.json()
+                raw_places = data.get("places", [])
+                
+                for rp in raw_places:
+                    loc = rp.get("location", {})
+                    p_lat = loc.get("latitude")
+                    p_lon = loc.get("longitude")
+                    
+                    if p_lat is None or p_lon is None:
+                        continue
+                        
+                    dist = haversine_km(lat, lon, p_lat, p_lon)
+                    
+                    # Display name is a localized text object in New API
+                    display_name = rp.get("displayName", {})
+                    name = display_name.get("text", "Unknown Venue")
+                    
+                    places.append(PlaceItem(
+                        id=rp.get("id", ""),
+                        name=name,
+                        address=rp.get("formattedAddress", ""),
+                        latitude=p_lat,
+                        longitude=p_lon,
+                        types=rp.get("types", []),
+                        distance_km=round(dist, 2)
+                    ))
+                    
+                # Sort by distance
+                places.sort(key=lambda x: x.distance_km)
+                
+            else:
+                logger.error(f"Google Places API returned status {response.status_code}: {response.text}")
+                # Fallback to mock on API error
+                mock_places = get_mock_places(lat, lon, category)
+                places = [PlaceItem(**p) for p in mock_places]
+                
+        except Exception as e:
+            logger.error(f"Error calling Google Places API: {e}")
+            # Fallback to mock on request exception
+            mock_places = get_mock_places(lat, lon, category)
+            places = [PlaceItem(**p) for p in mock_places]
+
+    res = NearbyPlacesResponse(
+        category=category,
+        places=places,
+        center={"latitude": lat, "longitude": lon}
+    )
+
+    # Save to Redis cache for 24 hours (86400 seconds)
+    try:
+        await redis_client.setex(cache_key, 86400, res.model_dump_json())
+    except Exception as e:
+        logger.warning(f"Failed to cache nearby places: {e}")
+
+    return res

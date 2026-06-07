@@ -34,6 +34,8 @@ class VerifiedModeResponse(BaseModel):
     disclaimer: str
     accuracy: Optional[int] = None
     query_type: Optional[str] = None
+    needs_lawyer: bool = False
+
 
 class VerifiedModeService:
     def __init__(self):
@@ -257,7 +259,8 @@ class VerifiedModeService:
                 latency_ms=latency,
                 disclaimer="",
                 accuracy=0,
-                query_type="other"
+                query_type="other",
+                needs_lawyer=False
             )
             
         # Retrieve
@@ -319,7 +322,7 @@ class VerifiedModeService:
             
             Sources Used: General AI Knowledge (No specific documents found in database)
             
-            Verified from NyayaSatya legal database.
+            Verified from Adhikar साथी legal database.
             
             Query: {query}
             Please answer in {target_lang_name}.
@@ -343,7 +346,7 @@ class VerifiedModeService:
             
             Sources Used: [List the sources you used, e.g. [Source 1], [Source 2]]
             
-            Verified from NyayaSatya legal database.
+            Verified from Adhikar साथी legal database.
             
             Context:
             {context_string}
@@ -372,7 +375,8 @@ class VerifiedModeService:
                 latency_ms=int((time.time() - start_time) * 1000),
                 disclaimer="API Error",
                 accuracy=0,
-                query_type="unknown"
+                query_type="unknown",
+                needs_lawyer=False
             )
         
         faith_result = await self.check_faithfulness(final_response, context_string)
@@ -392,6 +396,16 @@ class VerifiedModeService:
             
         latency = int((time.time() - start_time) * 1000)
         
+        # Determine if lawyer matching is needed
+        needs_lawyer = False
+        if query_type in ["criminal", "civil", "consumer", "labour", "women"]:
+            needs_lawyer = True
+        
+        query_lower = english_query.lower()
+        lawyer_keywords = ["lawyer", "advocate", "consult", "hire", "attorney", "court", "fir", "police", "arrest", "legal aid", "representation", "sue", "litigation"]
+        if any(kw in query_lower for kw in lawyer_keywords):
+            needs_lawyer = True
+            
         return VerifiedModeResponse(
             answer=final_response,
             citations=citations,
@@ -400,7 +414,8 @@ class VerifiedModeService:
             latency_ms=latency,
             disclaimer=final_disclaimer,
             accuracy=faith_score,
-            query_type=query_type
+            query_type=query_type,
+            needs_lawyer=needs_lawyer
         )
 
 verified_mode_service = VerifiedModeService()

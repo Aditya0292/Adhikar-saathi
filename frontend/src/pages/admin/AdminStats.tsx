@@ -34,10 +34,10 @@ export default function AdminStats() {
       {/* Sidebar */}
       <div className="w-64 bg-nyaya-dark flex flex-col shrink-0">
         <div className="p-6">
-          <Link to="/" className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-xl">
-            <img src="/logo.png" alt="NyayaSatya Logo" className="h-6 w-auto object-contain brightness-0 invert" />
-            <span>NyayaSatya</span>
-          </Link>
+          <div className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-xl tracking-tight">
+            <img src="/logo.png" alt="Adhikar साथी Logo" className="h-6 w-auto object-contain brightness-0 invert" />
+            <span>Adhikar साथी</span>
+          </div>
           <div className="mt-2 text-xs font-medium text-red-400 border border-red-500/30 bg-red-500/10 px-2 py-1 rounded w-max">
             ⚙ Admin Panel
           </div>

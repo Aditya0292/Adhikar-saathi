@@ -1,5 +1,5 @@
 """
-NyayaSatya Document Scanner — AI Analysis Pipeline
+Adhikar साथी Legal Doc Scanner — AI Analysis Pipeline
 ====================================================
 OCR extraction → Classification → Parallel analysis → Risk scoring
 

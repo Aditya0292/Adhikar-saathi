@@ -45,10 +45,10 @@ export default function Testimonials() {
           <div className="flex-1 relative">
             <span className="absolute -top-10 -left-6 text-8xl text-nyaya-green/10 font-serif pointer-events-none">"</span>
             <blockquote className="font-serif italic text-2xl md:text-3xl text-nyaya-text-dark leading-snug mb-6 relative z-10">
-              "मुझे नहीं पता था कि मैं ओवरटाइम के लिए दावा कर सकता हूँ। NyayaSatya ने मुझे Payment of Wages Act Section 14 बताया।"
+              "मुझे नहीं पता था कि मैं ओवरटाइम के लिए दावा कर सकता हूँ। अधिकार साथी ने मुझे Payment of Wages Act Section 14 बताया।"
             </blockquote>
             <p className="font-sans text-sm text-nyaya-muted">
-              "I didn't know I could claim overtime. NyayaSatya told me about Payment of Wages Act Section 14."
+              "I didn't know I could claim overtime. Adhikar साथी told me about Payment of Wages Act Section 14."
             </p>
           </div>
         </motion.div>
@@ -64,7 +64,7 @@ export default function Testimonials() {
           {/* Quote 1 */}
           <motion.div variants={fadeUp} className="bg-white rounded-xl p-8 border border-black/5 shadow-sm hover:shadow-md transition-shadow">
             <blockquote className="font-sans italic text-nyaya-text-dark mb-6 text-lg">
-              "My landlord threatened to throw my belongings out tomorrow. NyayaSatya showed me the state Rent Control Act requiring proper notice and court orders."
+              "My landlord threatened to throw my belongings out tomorrow. Adhikar साथी showed me the state Rent Control Act requiring proper notice and court orders."
             </blockquote>
             <div className="flex flex-col mt-auto">
               <div className="font-sans font-semibold text-sm text-nyaya-text-dark">Sunita M.</div>
@@ -117,7 +117,7 @@ export default function Testimonials() {
           
           <div className="relative z-10 flex flex-col items-center text-center">
             <blockquote className="font-serif italic text-2xl md:text-3xl mb-8 max-w-3xl leading-snug">
-              "As a lawyer, I've seen clients come in not knowing they had rights. NyayaSatya closes that gap before they reach my office."
+              "As a lawyer, I've seen clients come in not knowing they had rights. Adhikar साथी closes that gap before they reach my office."
             </blockquote>
             <div className="flex flex-col items-center">
               <div className="font-sans font-semibold text-lg mb-1 text-white">Advocate Priya Nair</div>

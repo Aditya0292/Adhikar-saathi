@@ -8,7 +8,7 @@ from app.supabase_client import get_service_client
 
 def seed_admin():
     client = get_service_client()
-    email = "admin@nyayasatya.com"
+    email = "admin@adhikarsathi.com"
     password = "AdminPassword123!"
     
     print(f"Attempting to create admin user: {email}")

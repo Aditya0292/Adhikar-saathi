@@ -186,8 +186,8 @@ export default function LawyerDashboard() {
         {/* Header: Avatar + Name */}
         <div className={`p-4 border-b border-black/5 flex flex-col gap-4 ${isCollapsed ? 'items-center' : ''}`}>
           <Link to="/" className={`font-serif font-semibold text-[#1A1F1B] flex items-center gap-2 text-xl tracking-tight ${isCollapsed ? 'justify-center' : ''}`}>
-            <img src="/logo.png" alt="NyayaSatya" className="h-7 w-auto object-contain" />
-            {!isCollapsed && <span>NyayaSatya</span>}
+            <img src="/logo.png" alt="Adhikar साथी" className="h-7 w-auto object-contain" />
+            {!isCollapsed && <span>Adhikar साथी</span>}
           </Link>
 
           <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
@@ -282,8 +282,8 @@ export default function LawyerDashboard() {
           {/* Mobile logo */}
           <div className="md:hidden flex items-center">
             <Link to="/" className="font-serif font-bold text-[#1A1F1B] text-lg flex items-center gap-1.5">
-              <img src="/logo.png" alt="NyayaSatya" className="h-6 w-auto" />
-              <span>NyayaSatya</span>
+              <img src="/logo.png" alt="Adhikar साथी" className="h-6 w-auto" />
+              <span>Adhikar साथी</span>
             </Link>
           </div>
 

@@ -1,10 +1,10 @@
 #!/bin/bash
-echo "Starting NyayaSatya..."
+echo "Starting Adhikar साथी..."
 
 # Start Redis in background
-docker run -d -p 6379:6379 --name nyaya-redis \
+docker run -d -p 6379:6379 --name adhikar-redis \
   redis:7-alpine 2>/dev/null || \
-  docker start nyaya-redis
+  docker start adhikar-redis
 
 # Start backend
 cd backend
@@ -27,5 +27,5 @@ echo "Press Ctrl+C to stop all services"
 
 # Stop everything on Ctrl+C
 trap "kill $BACKEND_PID $FRONTEND_PID; \
-      docker stop nyaya-redis; exit" INT
+      docker stop adhikar-redis; exit" INT
 wait

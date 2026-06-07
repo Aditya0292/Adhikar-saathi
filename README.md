@@ -1,4 +1,4 @@
-# NyayaSatya 🏛️
+# Adhikar साथी 🏛️
 
 > **AI-Powered Legal Advisory & Verified Advocate Discovery Platform for India**
 >
@@ -15,7 +15,7 @@
 ---
 
 ## 📖 Table of Contents
-1. [What Is NyayaSatya?](#-what-is-nyayasatya)
+1. [What Is Adhikar साथी?](#-what-is-adhikar-साथी)
 2. [System Architecture & Directory Map](#-system-architecture--directory-map)
 3. [User Experience & Portals](#-user-experience--portals)
 4. [AI, RAG & Vision Pipelines](#-ai-rag--vision-pipelines)
@@ -27,15 +27,15 @@
 
 ---
 
-## 🏛️ What Is NyayaSatya?
+## 🏛️ What Is Adhikar साथी?
 
-NyayaSatya is a modern digital platform designed to bridge the gap between complex Indian legislation and the everyday citizen. By combining state-of-the-art Generative AI with a verified directory of local legal practitioners, it offers immediate, grounded guidance in the user's native tongue.
+Adhikar साथी is a modern digital platform designed to bridge the gap between complex Indian legislation and the everyday citizen. By combining state-of-the-art Generative AI with a verified directory of local legal practitioners, it offers immediate, grounded guidance in the user's native tongue.
 
 | Feature | Capabilities & Implementations |
 | :--- | :--- |
 | **Instant Advisory** | Dual-mode reasoning: **Fast Mode** (streaming conversational answers) or **Verified Mode** (hybrid vector RAG + Cohere reranking). |
 | **Multilingual Support** | Query and receive structured replies in **10 Indian languages** (Hindi, Tamil, Telugu, Bengali, Marathi, Gujarati, Kannada, Malayalam, Punjabi, Odia, and English). |
-| **Document Scanner** | OCR notice analyzer checking **12 document types** (FIRs, Summons, Rental Deeds, etc.) extracting risk metrics (0-1.0), summaries, key clauses, and critical dates. |
+| **Legal Doc Scanner** | OCR notice analyzer checking **12 document types** (FIRs, Summons, Rental Deeds, etc.) extracting risk metrics (0-1.0), summaries, key clauses, and critical dates. |
 | **Advocate Discovery** | GPS-aware search matching clients to vetted local lawyers based on specialisation, fee parameters, and spoken languages. |
 | **Interactive Voice Portal** | Telephony webhook integrations (Vapi.ai) with audio translation, persona mapping, and Redis caching. |
 
@@ -44,7 +44,7 @@ NyayaSatya is a modern digital platform designed to bridge the gap between compl
 ## 📁 System Architecture & Directory Map
 
 ```
-nyayasatya/
+adhikarsathi/
 ├── backend/                  ← FastAPI application
 │   ├── app/
 │   │   ├── api/v1/           ← Controllers (auth, lawyer, admin, voice, doc, query)
@@ -117,7 +117,7 @@ graph TD
 
 ## 🔒 Database Schema & Security
 
-NyayaSatya stores information on a Supabase PostgreSQL instance secured by **Row-Level Security (RLS)**:
+Adhikar साथी stores information on a Supabase PostgreSQL instance secured by **Row-Level Security (RLS)**:
 - **`profiles`:** Client details, readable and writable only by the authenticated owner.
 - **`lawyer_profiles`:** Detailed credentials for registered advocates. Publicly searchable only if `is_verified` is true; write access is restricted to the owning advocate or administrators.
 - **`client_requests`:** Connects clients and lawyers. Row read and write policies ensure that only the requesting client and the matched advocate can view transaction communications.
@@ -240,4 +240,4 @@ Lawyer profile updated, triggers email notification, and goes live in LawyerFind
 ```
 
 ---
-*NyayaSatya — Empowering every Indian with accessible, verified legal guidance.*
+*Adhikar साथी — Empowering every Indian with accessible, verified legal guidance.*

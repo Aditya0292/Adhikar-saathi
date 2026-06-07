@@ -131,7 +131,7 @@ async def approve_lawyer(lawyer_id: str, user: dict = Depends(require_admin)):
             "lawyer_auth_id": lawyer["auth_id"],
             "type": "verification_approved",
             "title": "Your profile has been verified",
-            "body": "Congratulations! Your NyayaSatya advocate profile is now live. You can start receiving client requests.",
+            "body": "Congratulations! Your Adhikar साथी advocate profile is now live. You can start receiving client requests.",
             "is_read": False
         }).execute()
     except Exception as e:

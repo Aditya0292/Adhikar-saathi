@@ -14,11 +14,11 @@ export default function Footer() {
           <div className="md:col-span-1">
             <div className="flex flex-col items-start mb-4">
               <span className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-2xl tracking-tight">
-                <img src="/logo.png" alt="NyayaSatya Logo" className="h-8 w-auto object-contain brightness-0 invert" />
-                <span>NyayaSatya</span>
+                <img src="/logo.png" alt="Adhikar साथी Logo" className="h-8 w-auto object-contain brightness-0 invert" />
+                <span>Adhikar साथी</span>
               </span>
               <span className="font-sans text-[10px] text-nyaya-muted ml-10 tracking-widest uppercase">
-                न्यायसत्य
+                अधिकार साथी
               </span>
             </div>
             <p className="text-nyaya-muted text-sm max-w-xs leading-relaxed">
@@ -31,10 +31,10 @@ export default function Footer() {
             <h4 className="text-nyaya-text font-semibold text-sm uppercase tracking-wider mb-6">Platform</h4>
             <div className="flex flex-col space-y-4">
               <Link to="/" className="text-nyaya-muted text-sm hover:text-nyaya-green-bright transition-colors">Quick Answer</Link>
-              <Link to="/" className="text-nyaya-muted text-sm hover:text-nyaya-green-bright transition-colors">Verified Answers</Link>
-              <Link to="/" className="text-nyaya-muted text-sm hover:text-nyaya-green-bright transition-colors">Voice Agent</Link>
+              <Link to="/" className="text-nyaya-muted text-sm hover:text-nyaya-green-bright transition-colors">Verified Responses</Link>
+              <Link to="/" className="text-nyaya-muted text-sm hover:text-nyaya-green-bright transition-colors">Multilingual Voice Feature</Link>
               <Link to="/" className="text-nyaya-muted text-sm hover:text-nyaya-green-bright transition-colors">SOS Help</Link>
-              <Link to="/" className="text-nyaya-muted text-sm hover:text-nyaya-green-bright transition-colors">Document Scanner</Link>
+              <Link to="/" className="text-nyaya-muted text-sm hover:text-nyaya-green-bright transition-colors">Legal Doc Scanner</Link>
             </div>
           </div>
           
@@ -65,7 +65,7 @@ export default function Footer() {
         {/* Bottom Section: Trust Badges Row */}
         <div className="border-t border-white/10 pt-8 pb-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-nyaya-muted text-xs">
-            © 2026 NyayaSatya. All rights reserved.
+            © 2026 Adhikar साथी. All rights reserved.
           </div>
           
           <div className="flex items-center flex-wrap justify-center gap-2">
@@ -86,7 +86,7 @@ export default function Footer() {
         {/* Critical Legal Disclaimer */}
         <div className="text-center mt-2">
           <p className="text-nyaya-muted/50 text-[11px] max-w-4xl mx-auto leading-relaxed">
-            NyayaSatya provides general legal information, not legal advice. For advice specific to your situation, consult a qualified advocate.
+            Adhikar साथी provides general legal information, not legal advice. For advice specific to your situation, consult a qualified advocate.
           </p>
         </div>
 

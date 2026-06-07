@@ -22,7 +22,7 @@ export default function PlatformFeatures() {
             Two modes. One truth.
           </motion.h2>
           <motion.p variants={fadeUp} className="font-sans text-lg text-nyaya-muted max-w-2xl">
-            Choose quick general awareness or source-grounded verified answers from real Indian statutes.
+            Choose quick general awareness or source-grounded verified responses from real Indian statutes.
           </motion.p>
         </motion.div>
 
@@ -84,9 +84,9 @@ export default function PlatformFeatures() {
           >
             <div className="mb-8">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-nyaya-green-bright/20 text-nyaya-green-bright border border-nyaya-green-bright/30 text-xs font-semibold uppercase tracking-wider mb-6 font-sans">
-                <Search size={14} /> Verified Answer
+                <Search size={14} /> Verified Response
               </span>
-              <h3 className="font-serif text-3xl text-white mb-4">Source-Grounded Answers</h3>
+              <h3 className="font-serif text-3xl text-white mb-4">Source-Grounded Responses</h3>
               <p className="font-sans text-nyaya-muted/90">
                 Every answer cited to the exact statute, section, or landmark judgement. Hallucination-guarded. Legally traceable.
               </p>
@@ -160,7 +160,7 @@ export default function PlatformFeatures() {
             <div className="w-10 h-10 rounded-lg bg-nyaya-green/10 flex items-center justify-center mb-5">
               <FileText className="text-nyaya-green-mid" size={20} />
             </div>
-            <h4 className="font-serif text-xl font-bold text-nyaya-text-dark mb-2">Document Scanner</h4>
+            <h4 className="font-serif text-xl font-bold text-nyaya-text-dark mb-2">Legal Doc Scanner</h4>
             <p className="font-sans text-sm text-nyaya-muted leading-relaxed">
               Upload any legal document. Get a plain-language risk analysis instantly.
             </p>

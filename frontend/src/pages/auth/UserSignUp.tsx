@@ -66,8 +66,8 @@ export default function UserSignUp() {
         
         <div className="relative z-10">
           <Link to="/" className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-2xl tracking-tight hover:opacity-80 transition-opacity w-max">
-            <img src="/logo.png" alt="NyayaSatya Logo" className="h-8 w-auto object-contain brightness-0 invert" />
-            <span>NyayaSatya</span>
+            <img src="/logo.png" alt="Adhikar साथी Logo" className="h-8 w-auto object-contain brightness-0 invert" />
+            <span>Adhikar साथी</span>
           </Link>
         </div>
 
@@ -81,7 +81,7 @@ export default function UserSignUp() {
         </div>
         
         <div className="relative z-10 text-nyaya-muted text-xs">
-          © 2026 NyayaSatya. All rights reserved.
+          © 2026 Adhikar साथी. All rights reserved.
         </div>
       </div>
 
@@ -91,8 +91,8 @@ export default function UserSignUp() {
         {/* Mobile Header */}
         <div className="lg:hidden absolute top-6 left-6">
           <Link to="/" className="font-serif font-semibold text-nyaya-text-dark flex items-center gap-2 text-xl tracking-tight">
-            <img src="/logo.png" alt="NyayaSatya Logo" className="h-7 w-auto object-contain" />
-            <span>NyayaSatya</span>
+            <img src="/logo.png" alt="Adhikar साथी Logo" className="h-7 w-auto object-contain" />
+            <span>Adhikar साथी</span>
           </Link>
         </div>
 

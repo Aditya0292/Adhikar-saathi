@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, Query
+from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime, timedelta, timezone
 import uuid
@@ -8,10 +9,14 @@ from app.models.lawyer import (
     LawyerFullProfile, LawyerProfileUpdate, AvailabilityToggle,
     LawyerDashboardStats, ActivityItem, RankingInsight, RankingFactor,
     ClientRequestItem, ClientRequestRespond,
-    LawyerNotificationItem, ReviewReply
+    LawyerNotificationItem, ReviewReply,
+    LawyerMapFilters, LawyerMapResponse
 )
 from app.supabase_client import get_service_client
 from app.dependencies import require_user
+from app.config import settings
+from app.services import lawyer_service
+from app.utils.redis_client import redis_client
 
 logger = structlog.get_logger()
 router = APIRouter(prefix="/lawyers", tags=["Lawyer Dashboard"])
@@ -568,3 +573,168 @@ async def get_my_consultations(user: dict = Depends(require_user)):
     except Exception as e:
         logger.warning(f"Failed to fetch consultations: {e}")
         return []
+
+
+# ── Map & Geocoding Endpoints ─────────────────────────────────
+
+@router.get("/map", response_model=LawyerMapResponse)
+async def get_lawyers_on_map(
+    lat: Optional[float] = Query(None),
+    lon: Optional[float] = Query(None),
+    city: Optional[str] = Query(None),
+    state: Optional[str] = Query(None),
+    radius_km: float = Query(15.0),
+    specialisation: Optional[str] = Query(None),
+    language: Optional[str] = Query(None),
+    max_fee: Optional[int] = Query(None),
+    available_only: bool = Query(False),
+    limit: int = Query(50)
+):
+    """
+    Search and plot lawyers on a map with filters and GPS calculations.
+    """
+    filters = LawyerMapFilters(
+        specialisation=specialisation,
+        language=language,
+        max_fee=max_fee,
+        available_only=available_only,
+        limit=limit
+    )
+    
+    cache_key = f"lawyers_map:lat={lat}:lon={lon}:city={city}:state={state}:radius={radius_km}:spec={specialisation}:lang={language}:fee={max_fee}:avail={available_only}:lim={limit}"
+    
+    try:
+        cached = await redis_client.get(cache_key)
+        if cached:
+            import json
+            return LawyerMapResponse.model_validate_json(cached)
+    except Exception as e:
+        logger.warning(f"Failed to read from cache: {e}")
+        
+    client = get_service_client()
+    
+    import asyncio
+    try:
+        response = await asyncio.to_thread(
+            lawyer_service.get_map_pins,
+            db_client=client,
+            lat=lat,
+            lon=lon,
+            city=city,
+            state=state,
+            radius_km=radius_km,
+            filters=filters
+        )
+    except Exception as e:
+        logger.error(f"Error querying map pins: {e}")
+        raise HTTPException(status_code=500, detail="Failed to search lawyers near location.")
+        
+    try:
+        await redis_client.setex(cache_key, 300, response.model_dump_json())
+    except Exception as e:
+        logger.warning(f"Failed to write to cache: {e}")
+        
+    return response
+
+
+class ContactLawyerRequest(BaseModel):
+    category: str
+    situation_summary: str
+    user_city: str
+    user_language: str
+    urgency: str = "normal"
+    user_phone: Optional[str] = None
+
+
+@router.post("/{lawyer_id}/contact")
+async def contact_lawyer(
+    lawyer_id: str,
+    data: ContactLawyerRequest,
+    user: dict = Depends(require_user)
+):
+    client = get_service_client()
+    user_auth_id = user["sub"]
+    user_email = user.get("email")
+    
+    # Check if lawyer exists
+    lawyer_res = client.table("lawyers").select("id, auth_id").eq("id", lawyer_id).execute()
+    if not lawyer_res.data:
+        raise HTTPException(status_code=404, detail="Lawyer not found")
+        
+    expires_at = datetime.now(timezone.utc) + timedelta(days=2)
+    
+    request_data = {
+        "id": str(uuid.uuid4()),
+        "lawyer_id": lawyer_id,
+        "category": data.category,
+        "situation_summary": data.situation_summary,
+        "user_city": data.user_city,
+        "user_language": data.user_language,
+        "urgency": data.urgency,
+        "status": "pending",
+        "expires_at": expires_at.isoformat(),
+        "user_auth_id": user_auth_id,
+        "user_email": user_email,
+        "user_phone": data.user_phone,
+    }
+    
+    res = client.table("client_requests").insert(request_data).execute()
+    if not res.data:
+        raise HTTPException(status_code=500, detail="Failed to create connection request")
+        
+    # Also trigger a notification for the lawyer!
+    try:
+        lawyer_auth_id = lawyer_res.data[0]["auth_id"]
+        client.table("lawyer_notifications").insert({
+            "lawyer_auth_id": lawyer_auth_id,
+            "type": "new_request",
+            "title": "New Client Inquiry",
+            "body": f"A client is requesting consultation regarding a {data.category} matter.",
+        }).execute()
+    except Exception as e:
+        logger.warning(f"Failed to notify lawyer: {e}")
+        
+    return {"status": "success", "request_id": request_data["id"]}
+
+
+@router.get("/geocode")
+async def geocode_address(address: str = Query(...)):
+    """
+    Resolve text search / address query to latitude and longitude.
+    """
+    if not settings.google_maps_api_key:
+        return {
+            "latitude": 19.0760,
+            "longitude": 72.8777,
+            "formatted_address": "Mumbai, Maharashtra, India (Fallback)"
+        }
+        
+    import httpx
+    async with httpx.AsyncClient() as client:
+        try:
+            res = await client.get(
+                "https://maps.googleapis.com/maps/api/geocode/json",
+                params={
+                    "address": address,
+                    "key": settings.google_maps_api_key
+                },
+                timeout=10.0
+            )
+            if res.status_code != 200:
+                raise HTTPException(status_code=502, detail="Failed to fetch from geocoding service.")
+                
+            data = res.json()
+            if data.get("status") != "OK" or not data.get("results"):
+                raise HTTPException(status_code=404, detail="Address not found.")
+                
+            result = data["results"][0]
+            loc = result["geometry"]["location"]
+            return {
+                "latitude": loc["lat"],
+                "longitude": loc["lng"],
+                "formatted_address": result.get("formatted_address")
+            }
+        except httpx.HTTPError as e:
+            logger.error(f"Geocoding HTTP error: {e}")
+            raise HTTPException(status_code=502, detail="Geocoding service error.")
+

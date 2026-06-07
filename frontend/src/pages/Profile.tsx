@@ -79,7 +79,7 @@ export default function Profile() {
                 </Link>
                 <Link to="/history" className="p-4 border border-black/5 rounded-xl hover:bg-black/5 transition-colors group">
                   <h4 className="font-semibold text-nyaya-text-dark text-sm mb-1 group-hover:text-nyaya-green">Query History</h4>
-                  <p className="text-xs text-nyaya-muted">Review your past legal questions and verified answers.</p>
+                  <p className="text-xs text-nyaya-muted">Review your past legal questions and verified responses.</p>
                 </Link>
               </div>
             </div>

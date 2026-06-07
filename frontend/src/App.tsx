@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { APIProvider } from '@vis.gl/react-google-maps';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 import { AdminRoute } from './components/auth/AdminRoute';
@@ -19,43 +20,47 @@ import VerifiedAnswer from './pages/VerifiedAnswer';
 import DocumentScanner from './pages/DocumentScanner';
 import QueryHistory from './pages/QueryHistory';
 
+const googleMapsApiKey = (import.meta.env.VITE_GOOGLE_MAPS_KEY as string) || '';
+
 export default function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/lawyers" element={<LawyerFinder />} />
-          
-          {/* User Auth Routes */}
-          <Route path="/auth/signin" element={<UserSignIn />} />
-          <Route path="/auth/signup" element={<UserSignUp />} />
-          
-          {/* Lawyer Auth Routes */}
-          <Route path="/auth/lawyer/signin" element={<LawyerSignIn />} />
-          <Route path="/auth/lawyer/register" element={<LawyerRegister />} />
-          
-          {/* Private User Routes */}
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-          <Route path="/verified" element={<ProtectedRoute><VerifiedAnswer /></ProtectedRoute>} />
-          <Route path="/documents" element={<ProtectedRoute><DocumentScanner /></ProtectedRoute>} />
-          <Route path="/history" element={<ProtectedRoute><QueryHistory /></ProtectedRoute>} />
-          
-          {/* Private Lawyer Routes (Should ideally have a LawyerProtectedRoute) */}
-          <Route path="/lawyer/pending" element={<ProtectedRoute><LawyerPendingPage /></ProtectedRoute>} />
-          <Route path="/lawyer/dashboard" element={<ProtectedRoute><LawyerDashboard /></ProtectedRoute>} />
-          
-          {/* Admin Route */}
-          <Route path="/admin/verify" element={<AdminRoute><AdminVerify /></AdminRoute>} />
-          <Route path="/admin/stats" element={<AdminRoute><AdminStats /></AdminRoute>} />
-          
-          {/* Fallback redirect */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <APIProvider apiKey={googleMapsApiKey}>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/lawyers" element={<LawyerFinder />} />
+            
+            {/* User Auth Routes */}
+            <Route path="/auth/signin" element={<UserSignIn />} />
+            <Route path="/auth/signup" element={<UserSignUp />} />
+            
+            {/* Lawyer Auth Routes */}
+            <Route path="/auth/lawyer/signin" element={<LawyerSignIn />} />
+            <Route path="/auth/lawyer/register" element={<LawyerRegister />} />
+            
+            {/* Private User Routes */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/verified" element={<ProtectedRoute><VerifiedAnswer /></ProtectedRoute>} />
+            <Route path="/documents" element={<ProtectedRoute><DocumentScanner /></ProtectedRoute>} />
+            <Route path="/history" element={<ProtectedRoute><QueryHistory /></ProtectedRoute>} />
+            
+            {/* Private Lawyer Routes (Should ideally have a LawyerProtectedRoute) */}
+            <Route path="/lawyer/pending" element={<ProtectedRoute><LawyerPendingPage /></ProtectedRoute>} />
+            <Route path="/lawyer/dashboard" element={<ProtectedRoute><LawyerDashboard /></ProtectedRoute>} />
+            
+            {/* Admin Route */}
+            <Route path="/admin/verify" element={<AdminRoute><AdminVerify /></AdminRoute>} />
+            <Route path="/admin/stats" element={<AdminRoute><AdminStats /></AdminRoute>} />
+            
+            {/* Fallback redirect */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </APIProvider>
   );
 }

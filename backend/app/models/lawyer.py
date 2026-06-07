@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr
-from typing import Literal, List, Optional
+from typing import Literal, List, Optional, Dict
 from datetime import datetime
 
 STATE_BAR_COUNCILS = [
@@ -194,3 +194,35 @@ class LawyerNotificationItem(BaseModel):
     is_read: bool = False
     metadata: Optional[dict] = None
     created_at: datetime
+
+# ── Lawyer Maps Endpoint Models ─────────────────────────────────
+class LawyerMapFilters(BaseModel):
+    specialisation: Optional[str] = None
+    language: Optional[str] = None
+    max_fee: Optional[int] = None
+    available_only: bool = False
+    limit: int = 50
+
+class LawyerMapPin(BaseModel):
+    id: str
+    full_name: str
+    specialisations: List[str]
+    experience_years: int
+    city: str
+    latitude: float
+    longitude: float
+    distance_km: Optional[float] = None
+    fee_per_hour_inr: int
+    average_rating: float
+    total_reviews: int
+    languages: List[str]
+    is_available: bool
+    profile_photo_url: Optional[str] = None
+    score: float
+
+class LawyerMapResponse(BaseModel):
+    lawyers: List[LawyerMapPin]
+    center: Dict[str, float]
+    total_count: int
+    radius_km: float
+

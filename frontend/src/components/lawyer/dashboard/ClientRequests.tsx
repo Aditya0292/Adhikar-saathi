@@ -2,26 +2,26 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   Filter, Clock, MapPin, Globe, CheckCircle,
-  Send, X, Loader2, ChevronDown
+  Send, X, Loader2, ChevronDown, Scale, Shield, Users, Briefcase, Home, ShoppingCart, Scroll, Building2, DollarSign, Laptop, Pin, Mail, AlertCircle, Phone
 } from 'lucide-react';
 import { api } from '../../../api/client';
 import type { LawyerProfile, ClientRequest } from '../../../types/lawyer-dashboard';
 
 // ── Category config ──
-const CATEGORY_CONFIG: Record<string, { emoji: string; color: string; bg: string; border: string }> = {
-  criminal:       { emoji: '🔴', color: 'text-red-700',    bg: 'bg-red-50',    border: 'border-red-100' },
-  family:         { emoji: '👨‍👩‍👧', color: 'text-pink-700',   bg: 'bg-pink-50',   border: 'border-pink-100' },
-  labour:         { emoji: '💼', color: 'text-blue-700',   bg: 'bg-blue-50',   border: 'border-blue-100' },
-  property:       { emoji: '🏠', color: 'text-green-700',  bg: 'bg-green-50',  border: 'border-green-100' },
-  consumer:       { emoji: '🛒', color: 'text-teal-700',   bg: 'bg-teal-50',   border: 'border-teal-100' },
-  civil:          { emoji: '⚖️', color: 'text-gray-700',   bg: 'bg-gray-50',   border: 'border-gray-100' },
-  constitutional: { emoji: '📜', color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-100' },
-  corporate:      { emoji: '🏢', color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-100' },
-  taxation:       { emoji: '💰', color: 'text-amber-700',  bg: 'bg-amber-50',  border: 'border-amber-100' },
-  cyber:          { emoji: '💻', color: 'text-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-100' },
+const CATEGORY_CONFIG: Record<string, { icon: any; color: string; bg: string; border: string }> = {
+  criminal:       { icon: Shield,         color: 'text-red-700',    bg: 'bg-red-50',    border: 'border-red-100' },
+  family:         { icon: Users,          color: 'text-pink-700',   bg: 'bg-pink-50',   border: 'border-pink-100' },
+  labour:         { icon: Briefcase,      color: 'text-blue-700',   bg: 'bg-blue-50',   border: 'border-blue-100' },
+  property:       { icon: Home,           color: 'text-green-700',  bg: 'bg-green-50',  border: 'border-green-100' },
+  consumer:       { icon: ShoppingCart,   color: 'text-teal-700',   bg: 'bg-teal-50',   border: 'border-teal-100' },
+  civil:          { icon: Scale,          color: 'text-gray-700',   bg: 'bg-gray-50',   border: 'border-gray-100' },
+  constitutional: { icon: Scroll,         color: 'text-purple-700', bg: 'bg-purple-50', border: 'border-purple-100' },
+  corporate:      { icon: Building2,      color: 'text-orange-700', bg: 'bg-orange-50', border: 'border-orange-100' },
+  taxation:       { icon: DollarSign,     color: 'text-amber-700',  bg: 'bg-amber-50',  border: 'border-amber-100' },
+  cyber:          { icon: Laptop,         color: 'text-indigo-700', bg: 'bg-indigo-50', border: 'border-indigo-100' },
 };
 
-const getCat = (c: string) => CATEGORY_CONFIG[c.toLowerCase()] || { emoji: '📌', color: 'text-slate-700', bg: 'bg-slate-50', border: 'border-slate-100' };
+const getCat = (c: string) => CATEGORY_CONFIG[c.toLowerCase()] || { icon: Pin, color: 'text-slate-700', bg: 'bg-slate-50', border: 'border-slate-100' };
 
 // ── Mock Data ──
 const MOCK_REQUESTS: ClientRequest[] = [
@@ -278,12 +278,12 @@ function RequestCard({
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${cat.color} ${cat.bg} ${cat.border}`}>
-              {cat.emoji} {request.category}
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border flex items-center gap-1 ${cat.color} ${cat.bg} ${cat.border}`}>
+              <cat.icon size={10} /> {request.category}
             </span>
             {request.urgency === 'urgent' && (
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 animate-pulse">
-                🔴 Urgent
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200 animate-pulse flex items-center gap-1">
+                <AlertCircle size={10} /> Urgent
               </span>
             )}
           </div>
@@ -304,10 +304,18 @@ function RequestCard({
 
         {/* Responded: Show contact details */}
         {request.status === 'responded' && (request.user_email || request.user_phone) && (
-          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-4 space-y-1">
             <p className="text-xs font-semibold text-emerald-800 mb-1">Client Contact Details</p>
-            {request.user_email && <p className="text-xs text-emerald-700">📧 {request.user_email}</p>}
-            {request.user_phone && <p className="text-xs text-emerald-700">📞 {request.user_phone}</p>}
+            {request.user_email && (
+              <p className="text-xs text-emerald-700 flex items-center gap-1">
+                <Mail size={12} /> {request.user_email}
+              </p>
+            )}
+            {request.user_phone && (
+              <p className="text-xs text-emerald-700 flex items-center gap-1">
+                <Phone size={12} /> {request.user_phone}
+              </p>
+            )}
           </div>
         )}
 
@@ -410,8 +418,8 @@ function RespondModal({
         <div className="flex items-center justify-between p-5 border-b border-black/5">
           <div>
             <h2 className="font-serif font-bold text-lg text-[#1A1F1B]">Respond to Client</h2>
-            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border mt-1 inline-block ${cat.color} ${cat.bg} ${cat.border}`}>
-              {cat.emoji} {request.category}
+            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border mt-1 inline-flex items-center gap-1 ${cat.color} ${cat.bg} ${cat.border}`}>
+              <cat.icon size={10} /> {request.category}
             </span>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-full transition-colors cursor-pointer">

@@ -1,4 +1,4 @@
-# NyayaSatya — RAG Mode Backend
+# Adhikar साथी — RAG Mode Backend
 
 Deep Mode legal research backend powered by Pinecone hybrid search, Cohere reranking, HyDE query expansion, and Groq LLM.
 
@@ -46,8 +46,8 @@ Deep Mode legal research backend powered by Pinecone hybrid search, Cohere reran
 
 ### 1. Clone the repo
 ```bash
-git clone https://github.com/Aditya0292/NyayaSatya.git
-cd NyayaSatya/rag-mode
+git clone https://github.com/Aditya0292/AdhikarSathi.git
+cd AdhikarSathi/rag-mode
 ```
 
 ### 2. Create virtual environment
@@ -110,7 +110,7 @@ uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ### Option B — Railway
 
 1. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub
-2. Select `NyayaSatya` repo
+2. Select `AdhikarSathi` repo
 3. Set **Root Directory** to `rag-mode`
 4. Add all environment variables under **Variables** tab
 5. Railway auto-detects the `Procfile` and deploys

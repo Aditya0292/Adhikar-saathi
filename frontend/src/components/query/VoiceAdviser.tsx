@@ -161,16 +161,16 @@ export function VoiceAdviser({ isOpen, onClose, lang }: VoiceAdviserProps) {
       
       // Play Greeting audio
       const greetings: Record<string, string> = {
-        en: "Hello, I'm Nyaya, your legal adviser. What can I help you with today?",
-        hi: "नमस्ते, मैं न्याय हूँ। आज आपकी क्या सहायता कर सकता हूँ?",
-        ta: "வணக்கம், நான் நியாயா. இன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?",
-        te: "నమస్కారం, నేను న్యాయా. ఈరోజు మీకు ఎలా సహాయపడగలను?",
-        bn: "নমস্কার, আমি ন্যায়। আজ আপনাকে কীভাবে সাহায্য করতে পারি?",
-        mr: "नमस्कार, मी न्याय आहे. आज मी तुम्हाला कशी मदत करू शकतो?",
-        gu: "નમસ્તે, હું ન્યાય છું. આજે હું તમને કેવી રીતે મદદ કરી શકું?",
-        kn: "ನಮಸ್ಕಾರ, ನಾನು ನ್ಯಾಯ. ಇಂದು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
-        ml: "നമസ്കാരം, ഞാൻ ന്യായയാണ്. ഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കണം?",
-        pa: "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਮੈਂ ਨਿਆਇਆ ਹਾਂ। ਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?"
+        en: "Hello, I'm Adhikar साथी, your legal adviser. What can I help you with today?",
+        hi: "नमस्ते, मैं अधिकार साथी हूँ। आज आपकी क्या सहायता कर सकता हूँ?",
+        ta: "வணக்கம், நான் அதிகார் साथी. இன்று நான் உங்களுக்கு எவ்வாறு உதவ முடியும்?",
+        te: "నమస్కారం, నేను అధికార साथी. ఈరోజు మీకు ఎలా సహాయపడగలను?",
+        bn: "নমস্কার, আমি অধিকার साथी। আজ আপনাকে কীভাবে সাহায্য করতে পারি?",
+        mr: "नमस्कार, मी अधिकार साथी आहे. आज मी तुम्हाला कशी मदत करू शकतो?",
+        gu: "નમસ્તે, હું અધિકાર साथी છું. આજે હું તમને કેવી રીતે મદદ કરી શકું?",
+        kn: "ನಮಸ್ಕಾರ, ನಾನು ಅಧಿಕಾರ साथी. ಇಂದು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?",
+        ml: "നമസ്കാരം, ഞാൻ അധികാർ साथीയാണ്. ഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കണം?",
+        pa: "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਮੈਂ ਅਧਿਕਾਰ साथी ਹਾਂ। ਅੱਜ ਮੈਂ ਤੁਹਾਡੀ ਕੀ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ?"
       };
       const langPrefix = lang ? lang.toLowerCase().split('-')[0] : 'en';
       const greetingText = greetings[langPrefix] || greetings['en'];
@@ -414,7 +414,7 @@ export function VoiceAdviser({ isOpen, onClose, lang }: VoiceAdviserProps) {
             <img src="/logo.png" alt="Nyaya Logo" className="h-5 w-auto object-contain" />
           </div>
           <div>
-            <h2 className="font-serif font-bold text-base text-white">Voice Adviser — Nyaya</h2>
+            <h2 className="font-serif font-bold text-base text-white">Multilingual Voice Feature — Adhikar साथी</h2>
             <span className="text-[10px] text-nyaya-green font-semibold">Active Session</span>
           </div>
         </div>
@@ -449,7 +449,7 @@ export function VoiceAdviser({ isOpen, onClose, lang }: VoiceAdviserProps) {
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${
                   turn.role === 'user' ? 'text-nyaya-green' : 'text-slate-400'
                 }`}>
-                  {turn.role === 'user' ? 'You' : 'Nyaya'}
+                  {turn.role === 'user' ? 'You' : 'Adhikar साथी'}
                 </span>
                 {turn.role === 'adviser' && turn.law && (
                   <span className="text-[10px] bg-amber-50 border border-amber-200 text-amber-800 font-bold px-2 py-0.5 rounded capitalize">
@@ -514,7 +514,7 @@ export function VoiceAdviser({ isOpen, onClose, lang }: VoiceAdviserProps) {
             <div className="flex items-center gap-3 bg-[#111A13] border border-[#1D2E21] px-5 py-3 rounded-2xl rounded-tl-none text-xs text-nyaya-green font-semibold">
               <Loader2 className="animate-spin" size={16} />
               <span>
-                {lang === 'hi' ? 'न्याय सोच रहा है...' : 'Nyaya is thinking...'}
+                {lang === 'hi' ? 'अधिकार साथी सोच रहा है...' : 'Adhikar साथी is thinking...'}
               </span>
             </div>
           </div>
@@ -584,10 +584,10 @@ export function VoiceAdviser({ isOpen, onClose, lang }: VoiceAdviserProps) {
           <p className="text-sm font-semibold text-white tracking-wide">
             {appState === 'listening' || isRecording ? 'Listening...' : 
              appState === 'processing' ? 'Thinking...' : 
-             appState === 'speaking' ? 'Playing Response' : 'Tap to speak with Nyaya'}
+             appState === 'speaking' ? 'Playing Response' : 'Tap to speak with Adhikar साथी'}
           </p>
           <span className="text-xs text-nyaya-muted block mt-1">
-            {isRecording ? 'Tap the mic when finished' : 'न्याय से बात करें'}
+            {isRecording ? 'Tap the mic when finished' : 'अधिकार साथी से बात करें'}
           </span>
         </div>
 

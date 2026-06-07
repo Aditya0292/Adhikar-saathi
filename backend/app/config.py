@@ -56,5 +56,9 @@ class Settings(BaseSettings):
     vapi_assistant_id: str = ""
     vapi_phone_number_id: str = ""
     target_phone_number: str = ""
+    vapi_mock_mode: bool = False
+
+    # Google Maps API (Server-side & Geocoding)
+    google_maps_api_key: str = ""
 
 settings = Settings()

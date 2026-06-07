@@ -1,5 +1,5 @@
 """
-NyayaSatya Document Scanner — API Routes
+Adhikar साथी Legal Doc Scanner — API Routes
 ==========================================
 Upload, SSE status, result, share, delete, list
 """
@@ -33,7 +33,7 @@ import logging
 
 logger = logging.getLogger("documents_api")
 
-router = APIRouter(prefix="/documents", tags=["Document Scanner"])
+router = APIRouter(prefix="/documents", tags=["Legal Doc Scanner"])
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

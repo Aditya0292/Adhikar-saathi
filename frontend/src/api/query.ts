@@ -37,6 +37,7 @@ export interface VerifiedModeResponse {
   disclaimer: string;
   accuracy?: number;
   query_type?: string;
+  needs_lawyer: boolean;
 }
 
 export async function queryFast(

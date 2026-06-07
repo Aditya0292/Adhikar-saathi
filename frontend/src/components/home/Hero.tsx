@@ -95,7 +95,7 @@ export default function Hero() {
             className="w-full h-full object-contain"
           />
           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white/5 border border-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-[9px] font-sans font-medium text-nyaya-text/50 tracking-wider uppercase whitespace-nowrap">
-            ⚖️ Balance of Justice
+            Balance of Justice
           </div>
         </motion.div>
 
@@ -112,7 +112,7 @@ export default function Hero() {
             className="w-full h-full object-contain"
           />
           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white/5 border border-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-[9px] font-sans font-medium text-nyaya-text/50 tracking-wider uppercase whitespace-nowrap">
-            🏛️ Pillars of Law
+            Pillars of Law
           </div>
         </motion.div>
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Creating NyayaSatya project structure..."
+echo "Creating Adhikar साथी project structure..."
 
 # Root
 mkdir -p .github/workflows

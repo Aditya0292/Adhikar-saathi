@@ -58,7 +58,7 @@ export default function FinalCTA() {
           </motion.h2>
           
           <motion.div variants={fadeUp} className="font-sans text-sm text-nyaya-muted mt-6 uppercase tracking-widest font-semibold">
-            — NyayaSatya Mission Statement
+            — Adhikar साथी Mission Statement
           </motion.div>
           
           <motion.div variants={fadeUp} className="mt-12 flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">

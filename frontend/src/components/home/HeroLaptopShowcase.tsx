@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Briefcase, Database, FileText, Languages, Mic, Users, 
-  Inbox, Bell, ChevronRight, Sparkles, Scale
+  Inbox, Bell, ChevronRight, Sparkles
 } from 'lucide-react';
 
 // Mocks Data and Configuration
@@ -144,13 +144,21 @@ export default function HeroLaptopShowcase() {
                 : 'bg-white/[0.02] border-white/5 text-nyaya-muted hover:bg-white/5 hover:border-white/10'
             }`}
           >
-            {tab === 'dashboard' && <Scale size={16} />}
+            {tab === 'dashboard' && (
+              <img 
+                src="/logo.png" 
+                className={`w-4 h-4 object-contain transition-all duration-300 ${
+                  activeTab === 'dashboard' ? 'brightness-110' : 'opacity-50 grayscale'
+                }`} 
+                alt="Logo" 
+              />
+            )}
             {tab === 'voice' && <Mic size={16} />}
             {tab === 'scanner' && <FileText size={16} />}
             
             {tab === 'dashboard' && 'Advocate Tools'}
-            {tab === 'voice' && 'Voice Adviser'}
-            {tab === 'scanner' && 'Document Intelligence'}
+            {tab === 'voice' && 'Multilingual Voice Feature'}
+            {tab === 'scanner' && 'Legal Doc Scanner'}
           </button>
         ))}
       </div>
@@ -238,8 +246,8 @@ function AdvocateDashboardMock() {
         <div className="space-y-4">
           {/* Logo */}
           <div className="flex items-center gap-1.5 px-1 py-0.5">
-            <img src="/logo.png" className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 object-contain" alt="NyayaSatya Logo" />
-            <span className="font-serif font-bold text-nyaya-text hidden md:inline tracking-wide text-xs">NyayaSatya</span>
+            <img src="/logo.png" className="w-3.5 h-3.5 md:w-4.5 md:h-4.5 object-contain" alt="Adhikar साथी Logo" />
+            <span className="font-serif font-bold text-nyaya-text hidden md:inline tracking-wide text-xs">Adhikar साथी</span>
           </div>
 
           {/* Nav Items */}
@@ -247,7 +255,7 @@ function AdvocateDashboardMock() {
             {[
               { label: 'Overview', active: true, icon: Briefcase },
               { label: 'Client Requests', active: false, badge: 'Realtime', icon: Inbox },
-              { label: 'AI Document Audit', active: false, icon: FileText },
+              { label: 'Legal Doc Scanner', active: false, icon: FileText },
               { label: 'Consultations', active: false, icon: Users },
             ].map((item, idx) => (
               <div

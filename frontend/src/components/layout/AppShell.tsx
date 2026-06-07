@@ -16,15 +16,15 @@ export function AppShell({ children }: AppShellProps) {
   const navItems = [
     { label: 'Home', icon: Home, path: '/dashboard' },
     { label: 'Find a Lawyer', icon: Users, path: '/lawyers' },
-    { label: 'Document Scanner', icon: FileText, path: '/documents' },
+    { label: 'Legal Doc Scanner', icon: FileText, path: '/documents' },
     { label: 'Profile', icon: User, path: '/profile' },
   ];
 
   const desktopNavItems = [
     { label: 'Quick Answer', icon: HelpCircle, path: '/dashboard' },
-    { label: 'Verified Answer', icon: Search, path: '/verified' },
+    { label: 'Verified Response', icon: Search, path: '/verified' },
     { label: 'Find a Lawyer', icon: Users, path: '/lawyers' },
-    { label: 'Document Scanner', icon: FileText, path: '/documents' },
+    { label: 'Legal Doc Scanner', icon: FileText, path: '/documents' },
     { label: 'Query History', icon: FileText, path: '/history' },
     { label: 'Settings', icon: Settings, path: '/settings' },
   ];
@@ -64,8 +64,8 @@ export function AppShell({ children }: AppShellProps) {
         {/* Header */}
         <div className={`p-4 border-b border-black/5 flex flex-col gap-6 ${isCollapsed ? 'items-center' : ''}`}>
           <Link to="/" className={`font-serif font-semibold text-nyaya-text-dark flex items-center gap-2 text-xl tracking-tight ${isCollapsed ? 'justify-center' : ''}`}>
-            <img src="/logo.png" alt="NyayaSatya Logo" className="h-7 w-auto object-contain" /> 
-            {!isCollapsed && <span className="transition-opacity duration-300">NyayaSatya</span>}
+            <img src="/logo.png" alt="Adhikar साथी Logo" className="h-7 w-auto object-contain" /> 
+            {!isCollapsed && <span className="transition-opacity duration-300">Adhikar साथी</span>}
           </Link>
           
           <div className={`flex items-center gap-3 ${isCollapsed ? 'justify-center' : ''}`}>
@@ -137,8 +137,8 @@ export function AppShell({ children }: AppShellProps) {
           {/* Mobile Logo */}
           <div className="md:hidden flex items-center">
             <Link to="/dashboard" className="font-serif font-bold text-nyaya-text-dark text-lg flex items-center gap-1.5">
-              <img src="/logo.png" alt="NyayaSatya Logo" className="h-6 w-auto object-contain" />
-              <span>NyayaSatya</span>
+              <img src="/logo.png" alt="Adhikar साथी Logo" className="h-6 w-auto object-contain" />
+              <span>Adhikar साथी</span>
             </Link>
           </div>
 

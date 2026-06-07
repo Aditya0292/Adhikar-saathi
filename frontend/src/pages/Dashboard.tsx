@@ -54,7 +54,7 @@ export default function Dashboard() {
 
     setIsScanning(true);
     
-    // Simulate RAG & Document Scan loading time
+    // Simulate Verified Response & Legal Doc Scan loading time
     setTimeout(() => {
       setIsScanning(false);
       setScannedDoc({

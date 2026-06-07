@@ -150,10 +150,10 @@ export default function AdminVerify() {
       {/* Sidebar */}
       <div className="w-64 bg-nyaya-dark flex flex-col">
         <div className="p-6">
-          <Link to="/" className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-xl">
-            <img src="/logo.png" alt="NyayaSatya Logo" className="h-6 w-auto object-contain brightness-0 invert" />
-            <span>NyayaSatya</span>
-          </Link>
+          <div className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-xl tracking-tight">
+            <img src="/logo.png" alt="Adhikar साथी Logo" className="h-6 w-auto object-contain brightness-0 invert" />
+            <span>Adhikar साथी</span>
+          </div>
           <div className="mt-2 text-xs font-medium text-red-400 border border-red-500/30 bg-red-500/10 px-2 py-1 rounded w-max">
             ⚙ Admin Panel
           </div>
@@ -222,8 +222,18 @@ export default function AdminVerify() {
               <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="text-green-500 w-8 h-8" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900 mb-2">All caught up!</h3>
-              <p className="text-slate-500">No pending applications in the queue.</p>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                {activeTab === 'pending' ? 'All caught up!' : 
+                 activeTab === 'under_review' ? 'No applications under review' :
+                 activeTab === 'verified' ? 'No verified advocates' :
+                 activeTab === 'rejected' ? 'No rejected applications' : 'No applications found'}
+              </h3>
+              <p className="text-slate-500">
+                {activeTab === 'pending' ? 'No pending applications in the queue.' : 
+                 activeTab === 'under_review' ? 'There are no applications currently under review.' :
+                 activeTab === 'verified' ? 'There are no verified advocates on the platform yet.' :
+                 activeTab === 'rejected' ? 'There are no rejected applications.' : 'No lawyer applications found.'}
+              </p>
             </div>
           ) : (
             <div className="space-y-6">

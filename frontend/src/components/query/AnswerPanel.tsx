@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Scale, ThumbsUp, ThumbsDown, X } from 'lucide-react';
 
 interface Citation {
   id: string;
@@ -22,7 +23,7 @@ export default function AnswerPanel({ answerText, citations }: AnswerPanelProps)
       {/* Lawyer Banner */}
       <div className="w-full bg-accent-light text-primary-900 px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-xl">👨‍⚖️</span>
+          <Scale size={20} className="text-nyaya-green shrink-0" />
           <span className="text-sm md:text-base font-medium">Need official legal representation?</span>
         </div>
         <Link to="/lawyers" className="w-full md:w-auto text-center px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-500 transition-colors min-h-[44px] flex items-center justify-center shadow-sm">
@@ -41,8 +42,8 @@ export default function AnswerPanel({ answerText, citations }: AnswerPanelProps)
           {/* Action Row */}
           <div className="mt-8 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
              <div className="flex items-center gap-2">
-               <button className="p-2 min-h-[44px] min-w-[44px] text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-full transition-colors flex items-center justify-center">👍</button>
-               <button className="p-2 min-h-[44px] min-w-[44px] text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors flex items-center justify-center">👎</button>
+               <button className="p-2 min-h-[44px] min-w-[44px] text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-full transition-colors flex items-center justify-center" title="Helpful"><ThumbsUp size={16} /></button>
+               <button className="p-2 min-h-[44px] min-w-[44px] text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors flex items-center justify-center" title="Not helpful"><ThumbsDown size={16} /></button>
                <button className="p-2 min-h-[44px] min-w-[44px] text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors flex items-center justify-center ml-2" title="Copy to clipboard">
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                </button>
@@ -86,7 +87,7 @@ export default function AnswerPanel({ answerText, citations }: AnswerPanelProps)
           <div className="bg-slate-50 rounded-t-2xl p-5 w-full max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-6 sticky top-0 bg-slate-50 pt-2 pb-4 border-b border-slate-200">
               <h3 className="text-lg font-bold text-slate-900">Sources & Citations</h3>
-              <button onClick={() => setShowCitationsMobile(false)} className="p-2 min-h-[44px] min-w-[44px] bg-slate-200 rounded-full flex items-center justify-center">✕</button>
+              <button onClick={() => setShowCitationsMobile(false)} className="p-2 min-h-[44px] min-w-[44px] bg-slate-200 rounded-full flex items-center justify-center"><X size={16} /></button>
             </div>
             <div className="space-y-4 pb-8">
               {citations.map(c => (

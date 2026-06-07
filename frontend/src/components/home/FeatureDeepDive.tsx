@@ -13,10 +13,10 @@ export default function FeatureDeepDive() {
 
   const features = [
     { num: "01", title: "Legal Q&A" },
-    { num: "02", title: "Verified RAG" },
-    { num: "03", title: "Voice in Hindi" },
+    { num: "02", title: "Verified Responses" },
+    { num: "03", title: "Multilingual Voice Feature" },
     { num: "04", title: "Lawyer Matching" },
-    { num: "05", title: "Document Scan" },
+    { num: "05", title: "Legal Doc Scan" },
     { num: "06", title: "SOS Emergency" },
   ];
 
@@ -39,7 +39,7 @@ export default function FeatureDeepDive() {
         {/* Mobile: Horizontal Pill Selector */}
         <div className="md:hidden w-full pt-20 px-6 pb-4 border-b border-white/10 z-20 bg-nyaya-dark/95 backdrop-blur-md">
           <span className="text-xs font-sans font-bold text-nyaya-green-bright uppercase tracking-widest block mb-4">
-            What NyayaSatya does
+            What Adhikar साथी does
           </span>
           <div className="flex overflow-x-auto gap-3 hide-scrollbars pb-2 snap-x">
             {features.map((feat, idx) => (
@@ -68,7 +68,7 @@ export default function FeatureDeepDive() {
         {/* Desktop: Left Column (Sticky List) */}
         <div className="hidden md:flex flex-col justify-center w-[40%] h-full pl-12 lg:pl-24 pr-12 z-10 border-r border-white/5">
           <span className="text-sm font-sans font-bold text-nyaya-green-bright uppercase tracking-widest block mb-12">
-            What NyayaSatya does
+            What Adhikar साथी does
           </span>
           <div className="flex flex-col space-y-6">
             {features.map((feat, idx) => (
@@ -122,7 +122,7 @@ export default function FeatureDeepDive() {
               </motion.div>
             )}
 
-            {/* Panel 02 - Verified RAG */}
+            {/* Panel 02 - Verified Responses */}
             {activeIndex === 1 && (
               <motion.div 
                 key="panel-1"
@@ -150,7 +150,7 @@ export default function FeatureDeepDive() {
               </motion.div>
             )}
 
-            {/* Panel 03 - Voice in Hindi */}
+            {/* Panel 03 - Multilingual Voice Feature */}
             {activeIndex === 2 && (
               <motion.div 
                 key="panel-2"
@@ -225,7 +225,7 @@ export default function FeatureDeepDive() {
               </motion.div>
             )}
 
-            {/* Panel 05 - Document Scanner */}
+            {/* Panel 05 - Legal Doc Scanner */}
             {activeIndex === 4 && (
               <motion.div 
                 key="panel-4"

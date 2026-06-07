@@ -1,5 +1,5 @@
 @echo off
-echo Starting NyayaSatya development environment...
+echo Starting Adhikar साथी development environment...
 
 start "Backend" cmd /k "cd backend && c:\Users\adity\Videos\Documents\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000"
 

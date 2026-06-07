@@ -5,7 +5,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        serif: ["Cormorant Garamond", "Georgia", "serif"],
+        serif: ["Cormorant Garamond", "Noto Serif Devanagari", "Georgia", "serif"],
         sans: ["DM Sans", "Noto Sans", "system-ui", "sans-serif"],
       },
       colors: {

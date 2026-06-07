@@ -2,7 +2,7 @@
 
 > **This entire directory belongs to the AI/RAG lead (friend's scope).**
 
-This is where the Indian legal knowledge base lives — raw statutes, case law, and processed embeddings that power NyayaSatya's Fast Mode and Verified Mode AI answers.
+This is where the Indian legal knowledge base lives — raw statutes, case law, and processed embeddings that power Adhikar साथी's Fast Mode and Verified Mode AI answers.
 
 ---
 

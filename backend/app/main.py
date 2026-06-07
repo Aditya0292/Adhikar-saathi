@@ -1,13 +1,24 @@
+import sys
+# Dynamic virtualenv isolation: remove global AppData user-site packages from sys.path
+# to prevent global package conflicts (like Keras 3 / transformers clash on Windows)
+sys.path = [
+    p for p in sys.path 
+    if not (("AppData" in p or "Roaming" in p) and "site-packages" in p and ".venv" not in p)
+]
+
+import os
+os.environ["TRANSFORMERS_NO_TF"] = "1"
+
 import time
 import uuid
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.v1 import lawyer_auth, lawyer, user_auth, voice, admin, query, documents
+from app.api.v1 import lawyer_auth, lawyer, user_auth, voice, admin, query, documents, maps
 from app.config import settings
 
 app = FastAPI(
-    title="NyayaSatya API",
-    description="Backend API engine for Indian Legal Advisory Platform",
+    title="Adhikar साथी API",
+    description="Backend API engine for Adhikar साथी Platform",
     version="1.0.0"
 )
 
@@ -44,6 +55,7 @@ app.include_router(admin.router, prefix="/api/v1")
 app.include_router(voice.router, prefix="/api/v1")
 app.include_router(query.router, prefix="/api/v1/query", tags=["Query"])
 app.include_router(documents.router, prefix="/api/v1")
+app.include_router(maps.router, prefix="/api/v1")
 
 @app.get("/health", tags=["System"])
 async def health_check():

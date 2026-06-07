@@ -1,5 +1,5 @@
 {
-  "name": "nyayasatya-frontend",
+  "name": "adhikarsathi-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@googlemaps/markerclusterer": "^2.6.2",
     "@hookform/resolvers": "^3.9.0",
     "@supabase/supabase-js": "^2.45.0",
+    "@vis.gl/react-google-maps": "^1.8.3",
     "date-fns": "^4.2.1",
     "framer-motion": "^12.39.0",
     "lucide-react": "^1.16.0",

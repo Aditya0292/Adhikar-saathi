@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Zap, Search, ThumbsUp, ThumbsDown, Copy, ArrowUp, Sparkles, Paperclip, Plus, ChevronDown, Mic, MicOff, Volume2, VolumeX, Loader2 } from 'lucide-react';
+import { Zap, Search, ThumbsUp, ThumbsDown, Copy, ArrowUp, Sparkles, Paperclip, Plus, ChevronDown, Mic, MicOff, Volume2, VolumeX, Loader2, Map } from 'lucide-react';
 import { LanguageSelector } from '../ui/LanguageSelector';
 import { CitationCard } from '../ui/CitationCard';
 import { NyayaBadge } from '../ui/NyayaBadge';
@@ -7,6 +7,7 @@ import { useVoiceRecorder } from '../../hooks/useVoiceRecorder';
 import { useTextToSpeech } from '../../hooks/useTextToSpeech';
 import { VoiceAdviser } from './VoiceAdviser';
 import { queryFast, queryVerified, QueryRequest } from '../../api/query';
+import AdvocateMap from '../lawyer/AdvocateMap';
 
 interface Citation {
   index: number;
@@ -29,6 +30,7 @@ interface Message {
   accuracy?: number;
   query_type?: string;
   isVerified?: boolean;
+  needs_lawyer?: boolean;
 }
 
 interface ChatSession {
@@ -216,7 +218,7 @@ export function QueryInterface() {
 
   // Load past sessions from localStorage
   useEffect(() => {
-    const saved = localStorage.getItem('nyayasatya_sessions');
+    const saved = localStorage.getItem('adhikarsathi_sessions');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -241,7 +243,7 @@ export function QueryInterface() {
   }, [query]);
 
   const saveSessionsToStorage = (updatedSessions: ChatSession[]) => {
-    localStorage.setItem('nyayasatya_sessions', JSON.stringify(updatedSessions));
+    localStorage.setItem('adhikarsathi_sessions', JSON.stringify(updatedSessions));
     setSessions(updatedSessions);
   };
 
@@ -286,7 +288,8 @@ export function QueryInterface() {
           sender: 'assistant',
           text: response.answer,
           mode: 'fast',
-          law: response.category !== 'none' ? `Category: ${response.category}` : undefined
+          law: response.category !== 'none' ? `Category: ${response.category}` : undefined,
+          needs_lawyer: response.needs_lawyer
         };
       } else {
         const response = await queryVerified(req);
@@ -307,7 +310,8 @@ export function QueryInterface() {
           confidence: `${response.confidence.charAt(0).toUpperCase() + response.confidence.slice(1)} Confidence · ${response.hallucination_guard_passed ? 'Verified' : 'Unverified'}`,
           accuracy: response.accuracy,
           query_type: response.query_type,
-          isVerified: response.hallucination_guard_passed
+          isVerified: response.hallucination_guard_passed,
+          needs_lawyer: response.needs_lawyer
         };
       }
 
@@ -467,7 +471,7 @@ export function QueryInterface() {
           /* Claude / Grok Empty State */
           <div className="h-full flex flex-col justify-center items-center max-w-5xl mx-auto w-full text-center py-6">
             <div className="w-12 h-12 rounded-2xl bg-nyaya-green/10 flex items-center justify-center mb-4">
-              <img src="/logo.png" alt="NyayaSatya Logo" className="h-8 w-auto object-contain" />
+              <img src="/logo.png" alt="Adhikar साथी Logo" className="h-8 w-auto object-contain" />
             </div>
             <h2 className="font-serif text-2xl md:text-3xl text-nyaya-text-dark font-bold tracking-tight mb-2">
               How can I help you with Indian law?
@@ -508,7 +512,7 @@ export function QueryInterface() {
                   /* Assistant Message (Claude / Grok clean text style) */
                   <div className="flex gap-4 items-start">
                     <div className="w-8 h-8 rounded-full bg-nyaya-green/10 flex items-center justify-center flex-shrink-0 shadow-sm mt-0.5">
-                      <img src="/logo.png" alt="NyayaSatya Avatar" className="h-5 w-auto object-contain" />
+                      <img src="/logo.png" alt="Adhikar साथी Avatar" className="h-5 w-auto object-contain" />
                     </div>
                     <div className="flex-1 space-y-4">
                       <div className="flex items-center gap-2">
@@ -545,6 +549,32 @@ export function QueryInterface() {
                             {msg.citations.map((cit, cIdx) => (
                               <CitationCard key={cIdx} {...cit} />
                             ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {msg.needs_lawyer && (
+                        <div className="mt-4 border border-black/8 rounded-2xl overflow-hidden bg-white flex flex-col shadow-md max-w-2xl">
+                          <div className="p-3 bg-nyaya-warm/60 flex items-center justify-between border-b border-black/5">
+                            <div className="flex items-center gap-1.5 text-nyaya-text-dark">
+                              <Map size={14} className="text-nyaya-green shrink-0" />
+                              <span className="text-xs font-bold font-serif">Nearest Advocates for Legal Assistance (अधिवक्ता संपर्क)</span>
+                            </div>
+                            <a
+                              href="/lawyers"
+                              className="text-[10px] font-bold text-nyaya-green hover:text-nyaya-green-mid transition-colors flex items-center gap-0.5"
+                            >
+                              Open Full Finder &rarr;
+                            </a>
+                          </div>
+                          
+                          {/* 220px Inline Map Strip */}
+                          <div className="h-[220px] w-full relative">
+                            <AdvocateMap
+                              mode="advocate"
+                              showFilters={false}
+                              className="!border-0 !rounded-none"
+                            />
                           </div>
                         </div>
                       )}
@@ -624,7 +654,7 @@ export function QueryInterface() {
               /* Claude Pulsing Typing Indicator */
               <div className="flex gap-4 items-center max-w-6xl mx-auto">
                 <div className="w-8 h-8 rounded-full bg-nyaya-green/10 flex items-center justify-center flex-shrink-0 shadow-sm">
-                  <img src="/logo.png" alt="NyayaSatya Avatar" className="h-5 w-auto object-contain" />
+                  <img src="/logo.png" alt="Adhikar साथी Avatar" className="h-5 w-auto object-contain" />
                 </div>
                 <div className="flex items-center gap-1.5 py-2.5 px-4 bg-white border border-black/5 rounded-2xl">
                   <span className="w-1.5 h-1.5 bg-nyaya-green rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
@@ -733,7 +763,7 @@ export function QueryInterface() {
 
         </div>
         <div className="text-[10px] text-nyaya-muted text-center mt-2 font-medium">
-          NyayaSatya can make mistakes. Verify legal advice with our certified advocates.
+          Adhikar साथी can make mistakes. Verify legal advice with our certified advocates.
         </div>
       </div>
 

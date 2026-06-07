@@ -49,11 +49,11 @@ export default function Navbar() {
             className="flex-shrink-0 flex flex-col items-start origin-left"
           >
             <Link to="/" className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-xl md:text-2xl tracking-tight">
-              <img src="/logo.png" alt="NyayaSatya Logo" className="h-8 w-auto object-contain brightness-0 invert" />
-              <span>NyayaSatya</span>
+              <img src="/logo.png" alt="Adhikar साथी Logo" className="h-8 w-auto object-contain brightness-0 invert" />
+              <span>Adhikar साथी</span>
             </Link>
             <span className="font-sans text-[10px] text-nyaya-muted ml-10 tracking-widest uppercase">
-              न्यायसत्य
+              अधिकार साथी
             </span>
           </motion.div>
 
@@ -124,11 +124,11 @@ export default function Navbar() {
             <div className="flex justify-between items-center p-6 border-b border-white/10">
               <div className="flex flex-col items-start">
                 <span className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-xl tracking-tight">
-                  <img src="/logo.png" alt="NyayaSatya Logo" className="h-7 w-auto object-contain brightness-0 invert" />
-                  <span>NyayaSatya</span>
+                  <img src="/logo.png" alt="Adhikar साथी Logo" className="h-7 w-auto object-contain brightness-0 invert" />
+                  <span>Adhikar साथी</span>
                 </span>
                 <span className="font-sans text-[10px] text-nyaya-muted ml-10 tracking-widest uppercase">
-                  न्यायसत्य
+                  अधिकार साथी
                 </span>
               </div>
               <button 

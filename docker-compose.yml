@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────
-# NyayaSatya — Local Development Docker Compose
+# Adhikar साथी — Local Development Docker Compose
 # Services: PostgreSQL 16 + pgvector, Redis 7
 # Run: docker compose up -d
 # ─────────────────────────────────────────────────────────
@@ -11,29 +11,29 @@ services:
   # ── PostgreSQL 16 with pgvector extension ───────────────
   postgres:
     image: ankane/pgvector:v0.5.1
-    container_name: nyayasatya_postgres
+    container_name: adhikarsathi_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: nyayasatya
-      POSTGRES_PASSWORD: nyayasatya_dev_pass
-      POSTGRES_DB: nyayasatya_db
+      POSTGRES_USER: adhikarsathi
+      POSTGRES_PASSWORD: adhikarsathi_dev_pass
+      POSTGRES_DB: adhikarsathi_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nyayasatya -d nyayasatya_db"]
+      test: ["CMD-SHELL", "pg_isready -U adhikarsathi -d adhikarsathi_db"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     networks:
-      - nyayasatya_net
+      - adhikarsathi_net
 
   # ── Redis 7 (rate limiting + caching) ───────────────────
   redis:
     image: redis:7-alpine
-    container_name: nyayasatya_redis
+    container_name: adhikarsathi_redis
     restart: unless-stopped
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
@@ -47,7 +47,7 @@ services:
       retries: 5
       start_period: 5s
     networks:
-      - nyayasatya_net
+      - adhikarsathi_net
 
 # ── Named Volumes ────────────────────────────────────────
 volumes:
@@ -58,5 +58,5 @@ volumes:
 
 # ── Network ──────────────────────────────────────────────
 networks:
-  nyayasatya_net:
+  adhikarsathi_net:
     driver: bridge

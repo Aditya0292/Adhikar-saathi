@@ -133,7 +133,7 @@ async def _call_openai_compatible(
     # OpenRouter specific headers
     if "openrouter" in base_url:
         headers["HTTP-Referer"] = "http://localhost:3000"
-        headers["X-Title"] = "NyayaSatya"
+        headers["X-Title"] = "AdhikarSathi"
 
     body = {
         "model": model,

@@ -24,7 +24,7 @@ class FastModeService:
         self.provider = settings.default_llm_provider
         
         self.SYSTEM_PROMPT = """
-You are NyayaSatya, an AI legal awareness assistant specializing
+You are Adhikar साथी, an AI legal awareness assistant specializing
 exclusively in Indian law. Your purpose is to educate Indian citizens
 about their legal rights, applicable laws, consequences of crimes,
 and legal procedures in simple, clear language.

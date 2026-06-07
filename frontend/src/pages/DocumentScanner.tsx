@@ -176,7 +176,7 @@ export default function DocumentScanner() {
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-serif font-bold text-nyaya-text-dark">
-                  Document Scanner
+                  Legal Doc Scanner
                 </h1>
                 <p className="text-nyaya-muted font-sans text-sm">
                   Upload any Indian legal document for instant AI-powered risk analysis

@@ -24,7 +24,7 @@ TARGET_PHONE_NUMBER = os.getenv("TARGET_PHONE_NUMBER")
 
 client = Groq(api_key=GROQ_API_KEY)
 
-app = FastAPI(title="NyayaSatya Fast Mode")
+app = FastAPI(title="Adhikar साथी Fast Mode")
 
 app.add_middleware(
     CORSMiddleware,
@@ -58,7 +58,7 @@ class NearbyRequest(BaseModel):
 # ─── SYSTEM PROMPTS ───────────────────────────────────────
 
 SYSTEM_PROMPT = """
-You are NyayaSatya, an AI legal awareness assistant specializing
+You are Adhikar साथी, an AI legal awareness assistant specializing
 exclusively in Indian law. Your purpose is to educate Indian citizens
 about their legal rights, applicable laws, consequences of crimes,
 and legal procedures in simple, clear language.
@@ -126,7 +126,7 @@ Indian laws include but not limited to:
 """
 
 VAPI_SYSTEM_PROMPT = """
-You are NyayaSatya, an emergency legal guidance assistant for Indian
+You are Adhikar साथी, an emergency legal guidance assistant for Indian
 citizens. You are on a VOICE CALL with someone who needs urgent help.
 
 RULES:
