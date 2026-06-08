@@ -3,7 +3,6 @@ import os
 import asyncio
 from typing import List, Dict, Optional, Tuple
 from pydantic import BaseModel
-from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
 from pinecone_text.sparse import BM25Encoder
 import cohere
@@ -67,6 +66,7 @@ class VerifiedModeService:
         if not self.model:
             try:
                 logger.info("Lazily loading SentenceTransformer model 'mixedbread-ai/mxbai-embed-large-v1'...")
+                from sentence_transformers import SentenceTransformer
                 self.model = SentenceTransformer('mixedbread-ai/mxbai-embed-large-v1')
             except Exception as e:
                 logger.error(f"Failed to load SentenceTransformer model: {e}")
