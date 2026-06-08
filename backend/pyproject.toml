@@ -9,6 +9,7 @@ dependencies = [
     "pydantic[email]>=2.6.0",
     "pydantic-settings>=2.2.0",
     "supabase>=2.4.0",
+    "gotrue>=2.4.0",
     "pyjwt>=2.8.0",
     "cryptography>=42.0.0",
     "python-multipart>=0.0.9",
@@ -39,6 +40,7 @@ uvicorn = {extras = ["standard"], version = "^0.28.0"}
 pydantic = {extras = ["email"], version = "^2.6.0"}
 pydantic-settings = "^2.2.0"
 supabase = "^2.4.0"
+gotrue = "^2.4.0"
 redis = "^5.0.0"
 httpx = "^0.27.0"
 structlog = "^24.1.0"
