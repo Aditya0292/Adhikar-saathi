@@ -51,10 +51,7 @@ class VerifiedModeService:
             
         self.cohere_client = cohere.Client(settings.cohere_api_key) if settings.cohere_api_key else None
         
-        try:
-            self.model = SentenceTransformer('mixedbread-ai/mxbai-embed-large-v1')
-        except Exception:
-            self.model = None
+        self.model = None
 
         self.bm25 = None
         bm25_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "..", "rag-mode", "bm25_encoder.json")
@@ -67,7 +64,13 @@ class VerifiedModeService:
             logger.error(f"Error loading BM25: {e}")
 
     def embed_query(self, text: str) -> list[float]:
-        if not self.model: return []
+        if not self.model:
+            try:
+                logger.info("Lazily loading SentenceTransformer model 'mixedbread-ai/mxbai-embed-large-v1'...")
+                self.model = SentenceTransformer('mixedbread-ai/mxbai-embed-large-v1')
+            except Exception as e:
+                logger.error(f"Failed to load SentenceTransformer model: {e}")
+                return []
         embedding = self.model.encode(text, normalize_embeddings=True).tolist()
         return embedding
 
