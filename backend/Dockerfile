@@ -6,12 +6,18 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy configuration and install dependencies
-COPY pyproject.toml .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir .
+# Install poetry
+RUN pip install --no-cache-dir poetry
+
+# Copy only dependency configuration files
+COPY pyproject.toml poetry.lock* ./
+
+# Configure poetry: do not create virtual environments in the container and install main dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi --no-root --only main
 
 # Copy application files
 COPY . .
