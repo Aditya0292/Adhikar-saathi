@@ -1,8 +1,10 @@
 # Adhikar साथी 🏛️
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 > **AI-Powered Legal Advisory & Verified Advocate Discovery Platform for India**
 >
-> Grounded in Indian Law • Multilingual (10+ Languages) • Real-time OCR Notice & Agreement Analyzer • Conversational Telephony Adapters
+> Grounded in Indian Law • Multilingual (10+ Languages) • Real-time OCR Notice & Agreement Analyzer • Conversational Telephony Adapters • Open-source under MIT License
 
 ---
 
@@ -11,6 +13,7 @@
 - **Awwwards-Grade Visuals:** Revamped the landing page layout with custom mouse-tracking parallax fields, glowing background vectors, asymmetric grid lines, and smooth rotating SVG seals built around clean, transparent gold and emerald judicial assets.
 - **Fully Live Lawyer Dashboard:** Removed historical mock fallbacks. The advocate dashboard (Client Requests, Reviews, Consultations, and Live Analytics) is now fully integrated with Supabase PostgreSQL endpoints.
 - **Race Condition Loading Shields:** Implemented client-side loading spinners and deferred component mounting to handle asynchronous Supabase session initialization on page refresh, eliminating any flash of mock fallback profiles.
+- **License:** Open sourced under the [MIT License](LICENSE).
 
 ---
 
