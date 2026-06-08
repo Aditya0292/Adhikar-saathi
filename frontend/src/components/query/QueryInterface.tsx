@@ -558,7 +558,7 @@ export function QueryInterface() {
                           <div className="p-3 bg-nyaya-warm/60 flex items-center justify-between border-b border-black/5">
                             <div className="flex items-center gap-1.5 text-nyaya-text-dark">
                               <Map size={14} className="text-nyaya-green shrink-0" />
-                              <span className="text-xs font-bold font-serif">Nearest Advocates for Legal Assistance (अधिवक्ता संपर्क)</span>
+                              <span className="text-xs font-bold font-serif">Nearby Legal Authorities & Assistance (नज़दीकी पुलिस स्टेशन, न्यायालय और कानूनी सहायता)</span>
                             </div>
                             <a
                               href="/lawyers"
@@ -569,9 +569,9 @@ export function QueryInterface() {
                           </div>
                           
                           {/* 220px Inline Map Strip */}
-                          <div className="h-[220px] w-full relative">
+                          <div className="h-[300px] w-full relative">
                             <AdvocateMap
-                              mode="advocate"
+                              mode="emergency"
                               showFilters={false}
                               className="!border-0 !rounded-none"
                             />

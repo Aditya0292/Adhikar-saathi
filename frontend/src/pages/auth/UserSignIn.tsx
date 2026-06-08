@@ -5,8 +5,8 @@ import { NyayaButton } from '../../components/ui/NyayaButton';
 import { motion } from 'framer-motion';
 
 export default function UserSignIn() {
-   const [email, setEmail] = useState('admin@adhikarsathi.com');
-  const [password, setPassword] = useState('AdminPassword123!');
+   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,12 @@ export default function UserSignIn() {
   };
 
   const handleGoogleSignIn = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    });
   };
   
   const handleForgotPassword = async () => {

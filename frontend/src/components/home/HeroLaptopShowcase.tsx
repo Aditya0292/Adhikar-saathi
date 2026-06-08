@@ -163,17 +163,19 @@ export default function HeroLaptopShowcase() {
         ))}
       </div>
 
-      {/* Floating 3D Laptop Frame */}
+      {/* Floating 3D Device Frame */}
       <div className="laptop-perspective-container relative z-10 w-full flex flex-col items-center justify-center">
+        
+        {/* DESKTOP LAPTOP FRAME (hidden on mobile, shown on md and up) */}
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-          className={`w-full max-w-[850px] laptop-chassis laptop-chassis-3d transition-all duration-700 ${
+          className={`hidden md:block w-full max-w-[850px] laptop-chassis laptop-chassis-3d transition-all duration-700 ${
             activeTab === 'dashboard' ? 'shadow-glow-dashboard' : activeTab === 'voice' ? 'shadow-glow-voice' : 'shadow-glow-scanner'
           }`}
         >
           {/* Laptop Screen Lid */}
-          <div className="w-full aspect-[16/10] bg-[#0c0c0e] rounded-t-2xl p-[6px] md:p-[10px] border border-white/10 shadow-[inset_0_4px_20px_rgba(255,255,255,0.05),0_0_2px_rgba(255,255,255,0.2)] relative flex flex-col justify-between">
+          <div className="w-full aspect-[16/10] bg-[#0c0c0e] rounded-t-2xl p-[10px] border border-white/10 shadow-[inset_0_4px_20px_rgba(255,255,255,0.05),0_0_2px_rgba(255,255,255,0.2)] relative flex flex-col justify-between">
             {/* Screen Notch & LED */}
             <div className="absolute top-[3px] left-1/2 -translate-x-1/2 w-16 h-3 bg-[#0a0a0c] rounded-b-md border-b border-x border-white/5 flex items-center justify-center gap-1.5 z-40">
               <div className="w-1.5 h-1.5 rounded-full bg-[#111] border border-white/10" />
@@ -194,16 +196,41 @@ export default function HeroLaptopShowcase() {
           </div>
 
           {/* Laptop Hinge */}
-          <div className="w-[120px] md:w-[180px] h-[6px] md:h-[8px] bg-gradient-to-r from-[#0b0c0d] via-[#1a1b1e] to-[#0b0c0d] mx-auto rounded-t-sm border-t border-white/10 shadow-[0_1px_4px_rgba(0,0,0,0.5)] z-20" />
+          <div className="w-[180px] h-[8px] bg-gradient-to-r from-[#0b0c0d] via-[#1a1b1e] to-[#0b0c0d] mx-auto rounded-t-sm border-t border-white/10 shadow-[0_1px_4px_rgba(0,0,0,0.5)] z-20" />
 
           {/* Laptop Base (Keyboard Deck) */}
-          <div className="w-[104%] -ml-[2%] h-[12px] md:h-[18px] bg-gradient-to-b from-[#242428] via-[#141517] to-[#070709] rounded-b-xl relative border-t border-white/20 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.8),0_25px_50px_-12px_rgba(0,0,0,0.5)] flex items-center justify-center">
+          <div className="w-[104%] -ml-[2%] h-[18px] bg-gradient-to-b from-[#242428] via-[#141517] to-[#070709] rounded-b-xl relative border-t border-white/20 shadow-[0_15px_30px_-5px_rgba(0,0,0,0.8),0_25px_50px_-12px_rgba(0,0,0,0.5)] flex items-center justify-center">
             {/* Front Lip / Grip Indent */}
-            <div className="absolute -top-px left-1/2 -translate-x-1/2 w-[80px] md:w-[120px] h-[3px] md:h-[5px] bg-[#0c0c0e] rounded-b-md border-b border-x border-white/10" />
+            <div className="absolute -top-px left-1/2 -translate-x-1/2 w-[120px] h-[5px] bg-[#0c0c0e] rounded-b-md border-b border-x border-white/10" />
             {/* Faux Trackpad Reflection */}
-            <div className="absolute top-[3px] left-1/2 -translate-x-1/2 w-[90px] md:w-[130px] h-[4px] md:h-[8px] border-t border-x border-white/5 rounded-t bg-white/[0.01]" />
+            <div className="absolute top-[3px] left-1/2 -translate-x-1/2 w-[130px] h-[8px] border-t border-x border-white/5 rounded-t bg-white/[0.01]" />
           </div>
         </motion.div>
+
+        {/* MOBILE PHONE FRAME (shown on mobile, hidden on md and up) */}
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className={`md:hidden w-[280px] aspect-[9/19.5] bg-[#141517] rounded-[40px] p-[10px] border-[4px] border-[#2d2e30] shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),inset_0_4px_12px_rgba(255,255,255,0.1)] relative flex flex-col overflow-hidden transition-all duration-700 ${
+            activeTab === 'dashboard' ? 'shadow-glow-dashboard' : activeTab === 'voice' ? 'shadow-glow-voice' : 'shadow-glow-scanner'
+          }`}
+        >
+          {/* Speaker / Notch */}
+          <div className="absolute top-[3px] left-1/2 -translate-x-1/2 w-24 h-4 bg-[#0a0a0c] rounded-b-xl flex items-center justify-center gap-1.5 z-40">
+            <div className="w-8 h-1 bg-[#222] rounded-full" />
+            <div className="w-1.5 h-1.5 rounded-full bg-nyaya-green-bright/60 animate-pulse" />
+          </div>
+
+          {/* Screen Inner Viewport */}
+          <div className="w-full h-full bg-[#070908] rounded-[30px] overflow-hidden border border-[#1e2a21]/30 relative flex flex-col font-sans">
+            <AnimatePresence mode="wait">
+              {activeTab === 'dashboard' && <AdvocateDashboardMock key="dashboard" />}
+              {activeTab === 'voice' && <VoiceAdviserMock key="voice" />}
+              {activeTab === 'scanner' && <DocumentScannerMock key="scanner" />}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+        
       </div>
 
       {/* Slide Navigation Dots (Below Laptop) */}
@@ -242,7 +269,7 @@ function AdvocateDashboardMock() {
       className="w-full h-full flex bg-[#0c100e] text-[#e2ede5] text-[10px] md:text-xs overflow-hidden"
     >
       {/* Sidebar */}
-      <div className="w-[60px] md:w-[150px] border-r border-[#1e2a21] bg-[#090c0a] flex flex-col p-2.5 md:p-3 justify-between shrink-0">
+      <div className="hidden md:flex w-[150px] border-r border-[#1e2a21] bg-[#090c0a] flex-col p-3 justify-between shrink-0">
         <div className="space-y-4">
           {/* Logo */}
           <div className="flex items-center gap-1.5 px-1 py-0.5">
@@ -315,13 +342,13 @@ function AdvocateDashboardMock() {
         {/* Scrollable Content */}
         <div className="flex-1 p-3 md:p-4 overflow-y-auto space-y-3.5 hide-scrollbars">
           {/* Stats Bar */}
-          <div className="grid grid-cols-3 gap-2.5 shrink-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-2.5 shrink-0">
             {[
               { title: 'New Requests Today', val: '04', detail: 'Realtime updates' },
               { title: 'AI Risk Audit Pending', val: '02', detail: 'Scan contracts' },
               { title: 'Consultations Booked', val: '12', detail: 'This week' },
             ].map((stat, idx) => (
-              <div key={idx} className="bg-[#111914] border border-[#1e2a21] p-2 md:p-2.5 rounded-lg">
+              <div key={idx} className={`bg-[#111914] border border-[#1e2a21] p-2 md:p-2.5 rounded-lg ${idx > 0 ? 'hidden md:block' : ''}`}>
                 <p className="text-nyaya-muted text-[8px] uppercase tracking-wider">{stat.title}</p>
                 <div className="flex items-baseline gap-1 mt-1">
                   <span className="text-base md:text-xl font-bold text-nyaya-text leading-none">{stat.val}</span>
@@ -366,7 +393,7 @@ function AdvocateDashboardMock() {
               ].map((row, idx) => (
                 <div 
                   key={idx} 
-                  className="bg-[#101612] hover:bg-[#151e19] border border-[#1d2720] hover:border-[#25332a] p-2.5 rounded-lg flex items-start justify-between gap-3 transition-colors duration-200"
+                  className={`bg-[#101612] hover:bg-[#151e19] border border-[#1d2720] hover:border-[#25332a] p-2.5 rounded-lg flex items-start justify-between gap-3 transition-colors duration-200 ${idx > 1 ? 'hidden md:flex' : ''}`}
                 >
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -503,7 +530,7 @@ function DocumentScannerMock() {
       className="w-full h-full flex bg-[#0c0a07] text-[#eddcc4] text-[10px] md:text-xs overflow-hidden"
     >
       {/* Left Pane - Document Page Scanned */}
-      <div className="w-1/2 border-r border-[#2a2218] bg-[#060504] p-3 flex flex-col justify-between relative overflow-hidden shrink-0">
+      <div className="w-full md:w-1/2 md:border-r border-[#2a2218] bg-[#060504] p-3 flex flex-col justify-between relative overflow-hidden shrink-0">
         
         {/* Scan Green Laser Line */}
         <div className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#52b788] to-transparent shadow-[0_0_8px_#52b788] z-20 scan-line" />
@@ -551,7 +578,7 @@ function DocumentScannerMock() {
       </div>
 
       {/* Right Pane - AI Audit Extract */}
-      <div className="flex-1 flex flex-col min-w-0 bg-[#0e0c09] p-3 md:p-4">
+      <div className="hidden md:flex md:flex-1 flex-col min-w-0 bg-[#0e0c09] p-3 md:p-4">
         
         {/* Header */}
         <div className="border-b border-[#2a2218] pb-2 mb-2 shrink-0 flex items-center justify-between">

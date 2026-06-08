@@ -126,7 +126,7 @@ async def get_nearby_places(
     radius_meters: int = Query(5000, ge=500, le=50000)
 ):
     """
-    Get nearby police stations, courts, or legal aid centers using Google Places API (New).
+    Get nearby police stations, courts, or legal aid centers using free, public Overpass API (OpenStreetMap).
     """
     if category not in ["police", "court", "legal_aid"]:
         raise HTTPException(status_code=400, detail="Invalid category. Must be 'police', 'court', or 'legal_aid'.")
@@ -139,93 +139,83 @@ async def get_nearby_places(
             return NearbyPlacesResponse.model_validate_json(cached)
     except Exception as e:
         logger.warning(f"Failed to read from cache: {e}")
-        
-    # Check if Google Maps API key is available
-    if not settings.google_maps_api_key:
-        logger.info("Google Maps API Key not set, using mock places fallback.")
-        mock_places = get_mock_places(lat, lon, category)
-        res = NearbyPlacesResponse(
-            category=category,
-            places=[PlaceItem(**p) for p in mock_places],
-            center={"latitude": lat, "longitude": lon}
-        )
-        return res
 
-    # Select Places New endpoint based on category
-    api_url = "https://places.googleapis.com/v1/places:searchNearby"
-    headers = {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": settings.google_maps_api_key,
-        "X-Goog-FieldMask": "places.id,places.displayName,places.formattedAddress,places.location,places.types"
-    }
-
+    # Build Overpass Query
     if category == "police":
-        body = {
-            "includedTypes": ["police"],
-            "maxResultCount": 10,
-            "locationRestriction": {
-                "circle": {
-                    "center": {"latitude": lat, "longitude": lon},
-                    "radius": float(radius_meters)
-                }
-            }
-        }
+        query = f"""[out:json][timeout:25];
+        (
+          node["amenity"="police"](around:{radius_meters},{lat},{lon});
+          way["amenity"="police"](around:{radius_meters},{lat},{lon});
+        );
+        out center;"""
     elif category == "court":
-        body = {
-            "includedTypes": ["courthouse"],
-            "maxResultCount": 10,
-            "locationRestriction": {
-                "circle": {
-                    "center": {"latitude": lat, "longitude": lon},
-                    "radius": float(radius_meters)
-                }
-            }
-        }
+        query = f"""[out:json][timeout:25];
+        (
+          node["amenity"="courthouse"](around:{radius_meters},{lat},{lon});
+          way["amenity"="courthouse"](around:{radius_meters},{lat},{lon});
+        );
+        out center;"""
     else: # legal_aid
-        # Use Text Search for legal aid
-        api_url = "https://places.googleapis.com/v1/places:searchText"
-        body = {
-            "textQuery": "legal aid",
-            "maxResultCount": 10,
-            "locationBias": {
-                "circle": {
-                    "center": {"latitude": lat, "longitude": lon},
-                    "radius": float(radius_meters)
-                }
-            }
-        }
+        query = f"""[out:json][timeout:25];
+        (
+          node["office"="lawyer"](around:{radius_meters},{lat},{lon});
+          node["amenity"="townhall"](around:{radius_meters},{lat},{lon});
+          node["office"="government"](around:{radius_meters},{lat},{lon});
+          way["office"="lawyer"](around:{radius_meters},{lat},{lon});
+          way["amenity"="townhall"](around:{radius_meters},{lat},{lon});
+          way["office"="government"](around:{radius_meters},{lat},{lon});
+        );
+        out center;"""
 
     places = []
     
-    async with httpx.AsyncClient() as http_client:
+    async with httpx.AsyncClient() as client:
         try:
-            response = await http_client.post(api_url, headers=headers, json=body, timeout=12.0)
+            response = await client.post(
+                "https://overpass-api.de/api/interpreter",
+                data={"data": query},
+                timeout=15.0
+            )
             
             if response.status_code == 200:
                 data = response.json()
-                raw_places = data.get("places", [])
+                elements = data.get("elements", [])
                 
-                for rp in raw_places:
-                    loc = rp.get("location", {})
-                    p_lat = loc.get("latitude")
-                    p_lon = loc.get("longitude")
+                for el in elements:
+                    tags = el.get("tags", {})
+                    p_lat = el.get("lat") or el.get("center", {}).get("lat")
+                    p_lon = el.get("lon") or el.get("center", {}).get("lng") or el.get("center", {}).get("lon")
                     
                     if p_lat is None or p_lon is None:
                         continue
                         
                     dist = haversine_km(lat, lon, p_lat, p_lon)
                     
-                    # Display name is a localized text object in New API
-                    display_name = rp.get("displayName", {})
-                    name = display_name.get("text", "Unknown Venue")
+                    # Try to extract a name
+                    name = tags.get("name") or tags.get("official_name") or tags.get("name:en")
+                    if not name:
+                        if category == "police":
+                            name = "Police Station"
+                        elif category == "court":
+                            name = "Courthouse"
+                        else:
+                            name = "Government / Legal Office"
+                    
+                    # Build address from osm tags
+                    addr_parts = []
+                    for k in ["addr:housenumber", "addr:street", "addr:suburb", "addr:city", "addr:state", "addr:postcode"]:
+                        val = tags.get(k)
+                        if val:
+                            addr_parts.append(val)
+                    address = ", ".join(addr_parts) if addr_parts else tags.get("description", "Address details not available")
                     
                     places.append(PlaceItem(
-                        id=rp.get("id", ""),
+                        id=str(el.get("id")),
                         name=name,
-                        address=rp.get("formattedAddress", ""),
+                        address=address,
                         latitude=p_lat,
                         longitude=p_lon,
-                        types=rp.get("types", []),
+                        types=[tags.get("amenity") or tags.get("office") or category],
                         distance_km=round(dist, 2)
                     ))
                     
@@ -233,16 +223,16 @@ async def get_nearby_places(
                 places.sort(key=lambda x: x.distance_km)
                 
             else:
-                logger.error(f"Google Places API returned status {response.status_code}: {response.text}")
-                # Fallback to mock on API error
-                mock_places = get_mock_places(lat, lon, category)
-                places = [PlaceItem(**p) for p in mock_places]
+                logger.error(f"Overpass API returned status {response.status_code}: {response.text}")
                 
         except Exception as e:
-            logger.error(f"Error calling Google Places API: {e}")
-            # Fallback to mock on request exception
-            mock_places = get_mock_places(lat, lon, category)
-            places = [PlaceItem(**p) for p in mock_places]
+            logger.error(f"Error calling Overpass API: {e}")
+
+    # Fallback to mock places if Overpass failed or returned no results
+    if not places:
+        logger.info("Overpass API returned no results or failed, falling back to mock places.")
+        mock_places = get_mock_places(lat, lon, category)
+        places = [PlaceItem(**p) for p in mock_places]
 
     res = NearbyPlacesResponse(
         category=category,
@@ -250,7 +240,7 @@ async def get_nearby_places(
         center={"latitude": lat, "longitude": lon}
     )
 
-    # Save to Redis cache for 24 hours (86400 seconds)
+    # Save to Redis cache
     try:
         await redis_client.setex(cache_key, 86400, res.model_dump_json())
     except Exception as e:

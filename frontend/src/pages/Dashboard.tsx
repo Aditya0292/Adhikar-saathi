@@ -5,7 +5,7 @@ import { RiskMeter } from '../components/ui/RiskMeter';
 import LawyerCard from '../components/lawyer/LawyerCard';
 import { SOSButton } from '../components/layout/SOSButton';
 import { useAuth } from '../context/AuthContext';
-import { Upload, FileText, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Upload, FileText, AlertTriangle, RefreshCw, Sparkles } from 'lucide-react';
 
 interface ScannedDoc {
   name: string;
@@ -160,6 +160,25 @@ export default function Dashboard() {
             <div className="flex flex-col gap-2">
               <h3 className="font-serif font-bold text-[11px] text-nyaya-muted uppercase tracking-wider mb-1">Recommended for you</h3>
               <LawyerCard lawyer={mockLawyer} showPhone={false} compact={true} />
+            </div>
+
+            {/* Are you an Advocate Promo Card */}
+            <div className="bg-[#111A13] border border-[#C9A84C]/25 text-[#F0EDE6] rounded-2xl p-4 shadow-sm relative overflow-hidden mt-2">
+              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                <Sparkles size={64} className="text-[#C9A84C]" />
+              </div>
+              <h4 className="font-serif font-bold text-xs text-[#F0EDE6] mb-1 flex items-center gap-1.5">
+                Are you an Advocate? <Sparkles size={12} className="text-[#C9A84C]" />
+              </h4>
+              <p className="text-[10px] text-[#8A9E8D] leading-relaxed mb-3">
+                Grow your practice, boost your search ranking, and connect with clients seeking verified legal help. Plans start at ₹1,499/mo.
+              </p>
+              <a 
+                href="/auth/lawyer/register" 
+                className="inline-flex items-center justify-center w-full py-2 bg-[#C9A84C] hover:bg-[#8B6914] text-white text-[10px] font-bold rounded-lg transition-all duration-200"
+              >
+                View Advocate Plans
+              </a>
             </div>
 
           </div>

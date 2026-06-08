@@ -4,6 +4,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     environment: str = "development"
+    cors_allowed_origins: list[str] = ["http://localhost:3000"]
 
     # Supabase
     supabase_url: str

@@ -46,15 +46,11 @@ export default function Navbar() {
           {/* Left: Logo */}
           <motion.div 
             style={{ scale: logoScale }}
-            className="flex-shrink-0 flex flex-col items-start origin-left"
+            className="flex-shrink-0 flex items-center origin-left"
           >
-            <Link to="/" className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-xl md:text-2xl tracking-tight">
-              <img src="/logo.png" alt="Adhikar साथी Logo" className="h-8 w-auto object-contain brightness-0 invert" />
-              <span>Adhikar साथी</span>
+            <Link to="/" className="font-serif font-semibold text-nyaya-text text-xl md:text-2xl tracking-tight">
+              Adhikar साथी
             </Link>
-            <span className="font-sans text-[10px] text-nyaya-muted ml-10 tracking-widest uppercase">
-              अधिकार साथी
-            </span>
           </motion.div>
 
           {/* Center: Desktop Nav Links */}
@@ -73,7 +69,7 @@ export default function Navbar() {
 
           {/* Right: Actions */}
             <div className="hidden md:flex flex-col items-end">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 {role === 'admin' && (
                   <Link 
                     to="/admin/verify" 
@@ -83,22 +79,25 @@ export default function Navbar() {
                   </Link>
                 )}
                 <Link 
-                to="/auth/signin" 
-                className="font-sans font-medium text-sm text-nyaya-text border border-white/20 px-5 py-2.5 rounded-full hover:bg-white/5 transition-colors"
-              >
-                Sign In
-              </Link>
-              <Link 
-                to="/" 
-                className="font-sans font-semibold text-sm bg-nyaya-green-bright text-nyaya-dark px-5 py-2.5 rounded-full hover:scale-105 hover:shadow-lg hover:shadow-nyaya-green-bright/20 transition-all"
-              >
-                Get Free Help →
-              </Link>
+                  to="/auth/signin" 
+                  className="font-sans font-medium text-xs text-nyaya-text border border-white/20 px-4 py-2 rounded-full hover:bg-white/5 transition-colors"
+                >
+                  Citizen Sign In
+                </Link>
+                <Link 
+                  to="/auth/lawyer/signin" 
+                  className="font-sans font-medium text-xs text-nyaya-text border border-white/20 px-4 py-2 rounded-full hover:bg-white/5 transition-colors"
+                >
+                  Lawyer Sign In
+                </Link>
+                <Link 
+                  to="/dashboard" 
+                  className="font-sans font-semibold text-xs bg-nyaya-green-bright text-nyaya-dark px-4 py-2 rounded-full hover:scale-105 hover:shadow-lg hover:shadow-nyaya-green-bright/20 transition-all"
+                >
+                  Get Free Help →
+                </Link>
+              </div>
             </div>
-            <Link to="/auth/lawyer/register" className="text-[10px] text-nyaya-muted mt-2 hover:text-nyaya-text transition-colors">
-              Are you a Lawyer?
-            </Link>
-          </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
@@ -122,15 +121,9 @@ export default function Navbar() {
             className="fixed inset-0 z-[60] bg-nyaya-dark flex flex-col"
           >
             <div className="flex justify-between items-center p-6 border-b border-white/10">
-              <div className="flex flex-col items-start">
-                <span className="font-serif font-semibold text-nyaya-text flex items-center gap-2 text-xl tracking-tight">
-                  <img src="/logo.png" alt="Adhikar साथी Logo" className="h-7 w-auto object-contain brightness-0 invert" />
-                  <span>Adhikar साथी</span>
-                </span>
-                <span className="font-sans text-[10px] text-nyaya-muted ml-10 tracking-widest uppercase">
-                  अधिकार साथी
-                </span>
-              </div>
+              <Link to="/" onClick={() => setIsDrawerOpen(false)} className="font-serif font-semibold text-nyaya-text text-xl tracking-tight">
+                Adhikar साथी
+              </Link>
               <button 
                 onClick={() => setIsDrawerOpen(false)} 
                 className="text-nyaya-text hover:text-nyaya-green-bright"
@@ -172,21 +165,21 @@ export default function Navbar() {
                   onClick={() => setIsDrawerOpen(false)}
                   className="w-full text-center font-sans font-medium text-lg text-nyaya-text border border-white/20 py-4 rounded-xl hover:bg-white/5 transition-colors"
                 >
-                  Sign In
+                  Citizen Sign In
                 </Link>
                 <Link 
-                  to="/" 
+                  to="/auth/lawyer/signin"
+                  onClick={() => setIsDrawerOpen(false)}
+                  className="w-full text-center font-sans font-medium text-lg text-nyaya-text border border-white/20 py-4 rounded-xl hover:bg-white/5 transition-colors"
+                >
+                  Lawyer Sign In
+                </Link>
+                <Link 
+                  to="/dashboard" 
                   onClick={() => setIsDrawerOpen(false)}
                   className="w-full text-center font-sans font-semibold text-lg bg-nyaya-green-bright text-nyaya-dark py-4 rounded-xl"
                 >
                   Get Free Help
-                </Link>
-                <Link 
-                  to="/auth/lawyer/register" 
-                  onClick={() => setIsDrawerOpen(false)}
-                  className="text-center text-sm text-nyaya-muted mt-4 hover:text-nyaya-text transition-colors"
-                >
-                  Are you a Lawyer?
                 </Link>
               </motion.div>
             </motion.div>

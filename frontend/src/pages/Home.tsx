@@ -5,6 +5,7 @@ import TrustMarquee from '../components/home/TrustMarquee';
 import PlatformFeatures from '../components/home/PlatformFeatures';
 import FeatureDeepDive from '../components/home/FeatureDeepDive';
 import Testimonials from '../components/home/Testimonials';
+import PricingSection from '../components/home/PricingSection';
 import FinalCTA from '../components/home/FinalCTA';
 import Footer from '../components/layout/Footer';
 
@@ -20,6 +21,7 @@ export default function Home() {
         <FeatureDeepDive />
         <Testimonials />
         <FinalCTA />
+        <PricingSection />
       </main>
 
       <Footer />

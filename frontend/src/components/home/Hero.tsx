@@ -1,39 +1,10 @@
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { ChevronDown, ArrowRight } from 'lucide-react';
 import { fadeUp, staggerChildren, EASING } from '../../lib/motion';
 import HeroLaptopShowcase from './HeroLaptopShowcase';
 
 export default function Hero() {
-  // Mouse Parallax Values
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  const springConfig = { damping: 30, stiffness: 120, mass: 0.8 };
-  const dMouseX = useSpring(mouseX, springConfig);
-  const dMouseY = useSpring(mouseY, springConfig);
-
-  // Parallax transformations for background/floating assets
-  const transX1 = useTransform(dMouseX, [-0.5, 0.5], [-25, 25]);
-  const transY1 = useTransform(dMouseY, [-0.5, 0.5], [-25, 25]);
-  const rotate1 = useTransform(dMouseX, [-0.5, 0.5], [-5, 5]);
-
-  const transX2 = useTransform(dMouseX, [-0.5, 0.5], [25, -25]);
-  const transY2 = useTransform(dMouseY, [-0.5, 0.5], [25, -25]);
-  const rotate2 = useTransform(dMouseY, [-0.5, 0.5], [5, -5]);
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const { clientWidth, clientHeight } = document.documentElement;
-      const x = (e.clientX / clientWidth) - 0.5;
-      const y = (e.clientY / clientHeight) - 0.5;
-      mouseX.set(x);
-      mouseY.set(y);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
 
   return (
     <section className="relative flex flex-col items-center justify-center min-h-screen overflow-hidden bg-nyaya-dark select-none pt-28 md:pt-32 pb-24">
@@ -83,11 +54,8 @@ export default function Hero() {
       <div className="absolute inset-0 z-10 pointer-events-none hidden xl:block overflow-hidden">
         
         {/* Scales of Justice - Left Floating Element */}
-        <motion.div 
-          style={{ x: transX1, y: transY1, rotate: rotate1 }}
+        <div 
           className="absolute left-[3%] top-[20%] w-[220px] h-[220px] filter drop-shadow-[0_20px_50px_rgba(27,67,50,0.25)] select-none opacity-80"
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
         >
           <img 
             src="/scales_of_justice.png" 
@@ -97,14 +65,11 @@ export default function Hero() {
           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white/5 border border-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-[9px] font-sans font-medium text-nyaya-text/50 tracking-wider uppercase whitespace-nowrap">
             Balance of Justice
           </div>
-        </motion.div>
+        </div>
 
         {/* Courthouse Pillars - Right Floating Element */}
-        <motion.div 
-          style={{ x: transX2, y: transY2, rotate: rotate2 }}
+        <div 
           className="absolute right-[3%] top-[20%] w-[230px] h-[230px] filter drop-shadow-[0_20px_50px_rgba(201,168,76,0.12)] select-none opacity-80"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
         >
           <img 
             src="/courthouse_pillars.png" 
@@ -114,29 +79,16 @@ export default function Hero() {
           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white/5 border border-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-[9px] font-sans font-medium text-nyaya-text/50 tracking-wider uppercase whitespace-nowrap">
             Pillars of Law
           </div>
-        </motion.div>
+        </div>
 
       </div>
 
       {/* Main Hero Content */}
       <div className="relative z-20 max-w-4xl mx-auto px-6 flex flex-col items-center text-center">
-        
-        {/* Eyebrow badge */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: EASING, delay: 0.2 }}
-          className="mb-8"
-        >
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-nyaya-green/40 to-nyaya-green/10 text-nyaya-green-bright border border-nyaya-green-bright/25 text-xs font-semibold px-4 py-2 rounded-full tracking-widest uppercase shadow-[0_4px_20px_rgba(82,183,136,0.12)] backdrop-blur-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-nyaya-green-bright animate-pulse" />
-            India's Premier Legal AI
-          </div>
-        </motion.div>
 
         {/* Big Awwwards-style Headline with structured rows */}
         <motion.h1 
-          className="font-serif text-display-md md:text-display-xl lg:text-display-2xl text-nyaya-text mb-8 flex flex-col items-center tracking-tight leading-[1.05]"
+          className="font-serif text-display-lg md:text-display-xl lg:text-display-2xl text-nyaya-text mb-8 flex flex-col items-center tracking-tight leading-[1.05]"
           variants={staggerChildren}
           initial="hidden"
           animate="visible"
@@ -206,15 +158,15 @@ export default function Hero() {
           transition={{ duration: 0.9, delay: 1.3, ease: EASING }}
           className="mt-12 flex flex-col sm:flex-row gap-4 justify-center items-center w-full sm:w-auto px-4"
         >
-          <button className="group relative overflow-hidden w-full sm:w-auto bg-nyaya-green-bright text-nyaya-dark font-sans font-bold text-base px-9 py-4.5 rounded-xl hover:shadow-[0_8px_30px_rgba(82,183,136,0.4)] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+          <Link to="/dashboard" className="group relative overflow-hidden w-full sm:w-auto bg-nyaya-green-bright text-nyaya-dark font-sans font-bold text-base px-9 py-4.5 rounded-xl hover:shadow-[0_8px_30px_rgba(82,183,136,0.4)] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
             <span className="relative z-10">Ask Your First Question</span>
             <ArrowRight size={16} className="relative z-10 group-hover:translate-x-1.5 transition-transform duration-300" />
             <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300" />
-          </button>
+          </Link>
           
-          <button className="group w-full sm:w-auto border border-white/10 bg-white/[0.02] text-nyaya-text font-sans font-semibold px-9 py-4.5 rounded-xl hover:bg-white/5 hover:border-white/20 transition-all duration-300 cursor-pointer active:scale-95">
+          <Link to="/auth/lawyer/register" className="group w-full sm:w-auto border border-white/10 bg-white/[0.02] text-nyaya-text font-sans font-semibold px-9 py-4.5 rounded-xl hover:bg-white/5 hover:border-white/20 transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95">
             Register as a Lawyer
-          </button>
+          </Link>
         </motion.div>
       </div>
 

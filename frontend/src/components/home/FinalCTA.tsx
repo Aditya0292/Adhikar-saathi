@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { fadeUp, staggerChildren } from '../../lib/motion';
 
 export default function FinalCTA() {
@@ -62,12 +63,12 @@ export default function FinalCTA() {
           </motion.div>
           
           <motion.div variants={fadeUp} className="mt-12 flex flex-col sm:flex-row gap-4 justify-center w-full sm:w-auto">
-            <button className="w-full sm:w-auto bg-nyaya-green-bright text-nyaya-dark font-sans font-semibold text-base px-8 py-4 rounded-xl hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-nyaya-green-bright/25">
+            <Link to="/dashboard" className="w-full sm:w-auto text-center bg-nyaya-green-bright text-nyaya-dark font-sans font-semibold text-base px-8 py-4 rounded-xl hover:scale-[1.02] transition-all duration-300 shadow-lg shadow-nyaya-green-bright/25 flex items-center justify-center cursor-pointer">
               Ask Your First Question — It's Free
-            </button>
-            <button className="w-full sm:w-auto border border-white/20 text-nyaya-text font-sans font-medium px-8 py-4 rounded-xl hover:bg-white/5 transition-colors duration-300">
+            </Link>
+            <Link to="/auth/lawyer/register" className="w-full sm:w-auto text-center border border-white/20 text-nyaya-text font-sans font-medium px-8 py-4 rounded-xl hover:bg-white/5 transition-colors duration-300 flex items-center justify-center cursor-pointer">
               Register as a Lawyer →
-            </button>
+            </Link>
           </motion.div>
           
           <motion.p variants={fadeUp} className="mt-8 text-xs text-nyaya-muted font-sans max-w-md mx-auto leading-relaxed">
